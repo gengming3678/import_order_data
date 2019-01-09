@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.palline.rewardrule.entity.Dept">
+
+	<resultMap type="deptEntity" id="deptMap">
+		<id column="id" property="id" />
+		<result column="name" property="name" />
+		<result column="code" property="code" />
+		<result column="type" property="type" />
+		<result column="paramId" property="paramId" />
+		<result column="paramName" property="paramName" />
+		<result column="value" property="value" />
+	</resultMap>
+	
+	<resultMap type="idNameEntity" id="idNameMap">
+		<id column="id" property="id" />
+		<result column="name" property="name" />
+		<result column="code" property="code" />
+	</resultMap>
+	
+	
+	<resultMap type="keyValueCheckEntity" id="keyValueCheckMap">
+		<id column="id" property="id" />
+		<result column="value" property="value" />
+		<result column="deptId" property="deptId" />
+	</resultMap>
+
+	<sql id="getDeptWhere">
+		<where>
+		    <if test="name!=null  and name!='' ">
+			 	d.name like '%'+#{name}+'%' 
+			</if>  
+			<if test="code!=null  and code!='' ">
+			   or d.code like '%'+#{code}+'%'
+			</if>   
+		</where>
+	</sql>
+	
+	<select id="getDeptTotal" resultType="Long" parameterType="deptEntity">
+		select count(0) from pl_dept d 
+			 left join pl_dept_param dp  on  d.id=dp.organization_id
+			 left join pl_sys_param sp on   dp.param_id=sp.id
+		<include refid="getDeptWhere"/> 
+	</select>
+	
+	<select id="getDeptList" resultMap="deptMap" parameterType="deptEntity">
+		select d.name,d.code,d.type,dp.id,sp.parameter_name paramName,dp.value
+			 from pl_dept d 
+			 left join pl_dept_param dp  on  d.id=dp.organization_id
+			 left join pl_sys_param sp on   dp.param_id=sp.id
+		<include refid="getDeptWhere"/> 
+		 order by d.name
+	</select>
+	
+	<select id="findAllDeptList" resultMap="idNameMap" parameterType="deptEntity">
+		select id,name,type code from pl_dept 
+		<if test="code!=null and code!='' ">
+			where type=#{code}
+		</if>
+		order by type , name
+	</select>
+	
+	<select id="getSelectParamsByDeptId" resultType="Integer"  parameterType="keyValueCheckEntity">
+		  select sp.id id
+		  from pl_dept_param dp  ,  pl_sys_param sp 
+		  where dp.param_id=sp.id
+		 <if test="id!=null and  id!=null">
+		    and  dp.organization_id=#{id}
+		</if>  
+	</select>
+	
+	
+	
+	
+	<select id="findDeptParamValue" resultType="Integer"  parameterType="Integer">
+		  select dp.value id
+		  from pl_dept_param dp   where 1=1
+		 <if test="id!=null and  id!=null">
+		    and  dp.organization_id=#{id}
+		</if>  
+	</select>
+	
+	
+	<insert id="saveDept" parameterType="deptEntity">
+	 	insert into pl_dept (name, code,type) VALUES (#{name},#{code},#{type})
+	</insert>
+	
+	<insert id="saveDeptParam" parameterType="deptEntity">
+	 	insert into pl_dept_param (organization_id, param_id,value) VALUES (#{id},#{paramId},#{value})
+	</insert>
+	
+	<update id="updateDept" parameterType="deptEntity">
+	   update pl_dept set name=#{name} ,code=#{code} ,type=#{type} where id=#{id}
+	</update>
+	
+	<delete id="delDept" parameterType="Integer">
+		delete from pl_dept where id=#{id}
+	</delete>
+	
+	<delete id="deleteDeptParamByDeptId" parameterType="Integer">
+		delete from pl_dept_param where organization_id=#{deptId}
+	</delete>
+
+</mapper> 

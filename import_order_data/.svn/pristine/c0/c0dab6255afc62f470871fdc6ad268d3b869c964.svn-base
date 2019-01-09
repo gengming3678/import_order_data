@@ -1,0 +1,42 @@
+package com.palline.rewardrule.dao.imp;
+
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.stereotype.Repository;
+
+import com.palline.common.base.CommonBaseDao;
+import com.palline.rewardrule.dao.HolidayDao;
+import com.palline.rewardrule.entity.Holiday;
+
+
+@Repository
+public class HolidayDaoImp extends CommonBaseDao<Holiday, Integer> implements HolidayDao{
+	private static final String nameSpace = "com.palline.rewardrule.entity.Holiday.";
+
+
+
+	public List<Holiday> findAllHolidayList(Map<String,Object> map){
+		List<Holiday> list = super.queryForList(nameSpace+"findAllHolidayList",map);
+		return list;
+	}
+
+	@Override
+	public int deleteHolidayById(Integer id) {
+		// TODO Auto-generated method stub
+		return super.deleteObjectById(nameSpace+"delHoliday", id);
+	}
+
+	@Override
+	public int insertHoliday(Holiday Holiday) {
+		// TODO Auto-generated method stub
+		return super.saveObject(nameSpace+"saveHoliday", Holiday);
+	}
+
+	
+	
+
+
+	
+
+}

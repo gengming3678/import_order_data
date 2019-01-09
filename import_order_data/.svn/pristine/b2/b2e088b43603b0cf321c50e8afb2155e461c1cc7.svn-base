@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.palline.rewardrule.entity.Holiday">
+
+	<resultMap type="holidayEntity" id="holidayMap">
+		<id column="id" property="id" />
+		<result column="holidayDate" property="holidayDate" />
+	</resultMap>
+	
+	
+	
+	<select id="findAllHolidayList" resultMap="holidayMap" parameterType="map">
+		select id,holidayDate from pl_holiday 
+		<if test="year!=null  and year!='' ">
+				where holidayDate like #{year}+'%'  
+  		</if>
+		order by id
+	</select>
+	
+	
+	
+	
+	<insert id="saveHoliday" parameterType="holidayEntity">
+	 	insert into pl_holiday (holidayDate) VALUES (#{holidayDate})
+	</insert>
+	
+
+	
+	<delete id="delHoliday" parameterType="holidayEntity">
+		delete from pl_holiday where id =#{id}
+	</delete>
+	
+
+</mapper> 

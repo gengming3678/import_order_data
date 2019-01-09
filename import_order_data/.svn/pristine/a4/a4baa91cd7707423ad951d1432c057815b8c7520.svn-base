@@ -1,0 +1,11 @@
+# DEV SQLServer  Database
+orm.sqlserver.jdbc.driverClassName=com.microsoft.sqlserver.jdbc.SQLServerDriver
+orm.sqlserver.jdbc.url=jdbc:sqlserver://192.168.1.188:1433;DatabaseName=pl_report
+orm.sqlserver.jdbc.username=sa
+orm.sqlserver.jdbc.password=123456
+
+# Released  SQLServer  Database
+#orm.sqlserver.jdbc.driverClassName=com.microsoft.sqlserver.jdbc.SQLServerDriver
+#orm.sqlserver.jdbc.url=jdbc:sqlserver://172.23.6.91:1433;DatabaseName=Performance_dxj
+#orm.sqlserver.jdbc.username=performance
+#orm.sqlserver.jdbc.password=performance

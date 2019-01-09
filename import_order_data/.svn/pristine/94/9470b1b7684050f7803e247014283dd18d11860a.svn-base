@@ -1,0 +1,270 @@
+USE [Performance_dxj]
+GO
+/****** Object:  Table [dbo].[pl_user_role]    Script Date: 11/10/2015 12:32:02 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[pl_user_role](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[userId] [int] NULL,
+	[roleId] [int] NULL,
+ CONSTRAINT [PK_pl_user_dept] PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[pl_user]    Script Date: 11/10/2015 12:32:02 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[pl_user](
+	[name] [nvarchar](50) NULL,
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[realName] [nvarchar](50) NULL,
+	[password] [nvarchar](50) NULL,
+	[roleId] [int] NULL,
+	[deptId] [int] NULL,
+ CONSTRAINT [PK_pl_user] PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[pl_test]    Script Date: 11/10/2015 12:32:02 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[pl_test](
+	[id] [nchar](10) NULL,
+	[param1] [nchar](10) NULL,
+	[param2] [nchar](10) NULL,
+	[param3] [nchar](10) NULL,
+	[param4] [nchar](10) NULL,
+	[param5] [nchar](10) NULL,
+	[param6] [nchar](10) NULL,
+	[param7] [nchar](10) NULL
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[pl_table_manager]    Script Date: 11/10/2015 12:32:02 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[pl_table_manager](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[colName] [nvarchar](max) NULL,
+	[sqlContent] [nvarchar](max) NULL,
+	[nodeId] [int] NOT NULL,
+	[ifProcedure] [bit] NULL,
+	[queryCondition] [nvarchar](50) NULL,
+ CONSTRAINT [PK_pl_report_manager] PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[pl_sys_param]    Script Date: 11/10/2015 12:32:02 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[pl_sys_param](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[parameter_name] [nvarchar](50) NULL,
+	[description] [nvarchar](200) NULL,
+	[value] [decimal](18, 4) NULL,
+	[dept_override] [bit] NULL,
+ CONSTRAINT [PK_pl_sys_param] PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[pl_role_node]    Script Date: 11/10/2015 12:32:02 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[pl_role_node](
+	[roleId] [int] NULL,
+	[nodeId] [int] NULL,
+	[id] [int] IDENTITY(1,1) NOT NULL,
+ CONSTRAINT [PK_pl_role_node] PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[pl_role_dept]    Script Date: 11/10/2015 12:32:02 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[pl_role_dept](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[roleId] [int] NULL,
+	[deptId] [int] NULL,
+ CONSTRAINT [PK_pl_role_dept] PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[pl_role]    Script Date: 11/10/2015 12:32:02 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[pl_role](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[roleName] [nvarchar](50) NULL,
+	[roleCode] [nvarchar](50) NULL,
+ CONSTRAINT [PK_pl_role] PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[pl_reward_rule_history]    Script Date: 11/10/2015 12:32:02 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[pl_reward_rule_history](
+	[id] [int] NOT NULL,
+	[beiShu] [numeric](18, 2) NULL,
+	[zengFuBiLi] [numeric](18, 2) NULL,
+	[zhouMo] [numeric](18, 2) NULL,
+	[dianDanJia] [numeric](18, 2) NULL,
+	[deptId] [int] NULL,
+	[tiDuiTypeId] [int] NULL,
+	[updateTime] [datetime2](7) NULL,
+	[tiQuBiLi] [numeric](18, 2) NULL,
+	[jiJiangPoint] [numeric](18, 2) NULL,
+	[biaoZhun] [numeric](18, 2) NULL,
+	[tiDuiName] [nvarchar](50) NULL
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[pl_reward_rule]    Script Date: 11/10/2015 12:32:02 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[pl_reward_rule](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[beiShu] [numeric](18, 2) NULL,
+	[zengFuBiLi] [numeric](18, 2) NULL,
+	[zhouMo] [numeric](18, 2) NULL,
+	[dianDanJia] [numeric](18, 2) NULL,
+	[deptId] [int] NULL,
+	[tiDuiTypeId] [int] NULL,
+	[updateTime] [datetime2](7) NULL,
+	[tiQuBiLi] [numeric](18, 2) NULL,
+	[jiJiangPoint] [numeric](18, 2) NULL,
+	[biaoZhun] [numeric](18, 2) NULL,
+	[tiDuiName] [nvarchar](50) NULL,
+ CONSTRAINT [PK_pl_reward_rule] PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[pl_node]    Script Date: 11/10/2015 12:32:02 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[pl_node](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[text] [nvarchar](50) NULL,
+	[url] [nvarchar](50) NULL,
+	[leaf] [bit] NULL,
+	[parentId] [int] NULL,
+	[imgType] [nchar](10) NULL,
+	[xuHao] [int] NULL,
+ CONSTRAINT [PK_pl_node] PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[pl_name_code]    Script Date: 11/10/2015 12:32:02 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[pl_name_code](
+	[id] [nvarchar](50) NOT NULL,
+	[name] [nvarchar](50) NULL,
+	[code] [nvarchar](50) NULL,
+	[type] [nvarchar](50) NULL
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[pl_holiday]    Script Date: 11/10/2015 12:32:02 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[pl_holiday](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[holidayDate] [nvarchar](50) NULL,
+ CONSTRAINT [PK_pl_holiday] PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[pl_dept_param]    Script Date: 11/10/2015 12:32:02 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[pl_dept_param](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[organization_id] [int] NULL,
+	[param_id] [int] NULL,
+	[value] [decimal](18, 4) NULL,
+ CONSTRAINT [PK_pl_dept_param] PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[pl_dept]    Script Date: 11/10/2015 12:32:02 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[pl_dept](
+	[id] [int] NOT NULL,
+	[name] [nvarchar](50) NULL,
+	[code] [nvarchar](50) NULL,
+	[type] [nvarchar](50) NULL,
+ CONSTRAINT [PK_pl_dept] PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[pl_cardinal_num]    Script Date: 11/10/2015 12:32:02 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[pl_cardinal_num](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[cardinalNum] [nvarchar](50) NULL,
+	[allCardinalNum] [nvarchar](50) NULL,
+	[ifformal] [bit] NULL,
+	[deptId] [int] NULL,
+	[updateTime] [datetime2](7) NULL,
+ CONSTRAINT [PK_pl_cardinal_num] PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO

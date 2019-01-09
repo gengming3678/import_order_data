@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.palline.system.entity.Role">
+
+	<resultMap type="roleEntity" id="roleMap">
+		<id column="id" property="id" />
+		<result column="roleName" property="roleName" />
+		<result column="roleCode" property="roleCode" />
+		<result column="deptId" property="deptId" />
+	</resultMap>
+	
+	<resultMap type="keyValueCheckEntity" id="keyValueCheckMap">
+		<id column="id" property="id" />
+		<result column="text" property="text" />
+	</resultMap>
+
+	<sql id="getRoleWhere">
+		<where>
+		    <if test="roleName!=null  and roleName!='' ">
+			 	roleName like '%'+#{roleName}+'%' 
+			</if>  
+			<if test="roleCode!=null  and roleCode!='' ">
+			   or roleCode like '%'+#{roleCode}+'%'
+			</if>   
+		</where>
+	</sql>
+	
+	<select id="getRoleTotal" resultType="Long" parameterType="roleEntity">
+		select count(0) from pl_role 
+		<include refid="getRoleWhere"/> 
+	</select>
+	
+	<select id="getRoleList" resultMap="roleMap" parameterType="roleEntity">
+		select * from pl_role
+		<include refid="getRoleWhere"/> 
+		 order by id
+	</select>
+	
+	<select id="getAllRoleList" resultMap="roleMap" parameterType="roleEntity">
+		select r.id roleId,r.roleName roleName from pl_role r
+		 order by r.id
+	</select>
+	
+	<select id="getSelectDeptListByRoleId" resultMap="roleMap" parameterType="roleEntity">
+		 select  d.id deptId,d.name  text 
+		  		from pl_role_dept rd ,pl_dept d 
+		  		    where rd.deptId=d.id 
+  			<if test="roleId!=null  and roleId!='' ">
+  				and rd.roleId=#{roleId}
+  			</if>
+	</select>
+	
+	
+	<select id="getOneLevelSelectDeptList" resultMap="keyValueCheckMap" parameterType="roleEntity">
+		 SELECT  distinct(type) text FROM pl_dept
+	</select>
+	
+	 
+	
+	<insert id="saveRole" parameterType="roleEntity">
+	 	insert into pl_role (roleName, roleCode) VALUES (#{roleName},#{roleCode})
+	</insert>
+	
+	<insert id="saveRoleDept" parameterType="java.util.List">
+	 	insert into pl_role_dept (roleId, deptId) VALUES 
+	 	<foreach collection="list" item="item" separator=",">
+	 		(#{item.roleId},#{item.deptId})
+	 	</foreach>
+	 	
+	</insert>
+	
+	
+	
+	<update id="updateRole" parameterType="roleEntity">
+	   update pl_role set roleName=#{roleName} ,roleCode=#{roleCode}  where id=#{id}
+	</update>
+	
+	<delete id="delRole" parameterType="Integer">
+		delete from pl_role where id=#{id}
+	</delete>
+	
+	<delete id="deleteRoleNodeByRoleId" parameterType="Integer">
+		delete from pl_role_node where roleId=#{roleId}
+	</delete>
+	
+	<delete id="deleteRoleDeptByRoleId" parameterType="Integer">
+		delete from pl_role_dept where roleId=#{roleId}
+	</delete>
+	
+
+</mapper> 

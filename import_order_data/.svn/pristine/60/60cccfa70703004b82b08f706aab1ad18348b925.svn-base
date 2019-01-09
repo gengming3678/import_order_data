@@ -1,0 +1,64 @@
+package com.palline.rewardrule.dao.imp;
+
+import java.util.List;
+
+import org.springframework.stereotype.Repository;
+
+import com.palline.common.base.CommonBaseDao;
+import com.palline.rewardrule.dao.SysParamDao;
+import com.palline.rewardrule.entity.SysParam;
+
+
+@Repository
+public class SysParamDaoImp extends CommonBaseDao<SysParam, Integer> implements SysParamDao{
+	private static final String nameSpace = "com.palline.rewardrule.entity.SysParam.";
+
+
+	@Override
+	public int updateSysParam(SysParam sysParam) {
+		// TODO Auto-generated method stub
+		return super.updateObject(nameSpace+"updateSysParam", sysParam);
+	}
+
+	@Override
+	public int deleteSysParamById(Integer id) {
+		// TODO Auto-generated method stub
+		return super.deleteObjectById(nameSpace+"delSysParam", id);
+	}
+	
+	public int deleteSysParamNodeBySysParamId(Integer sysParamId) {
+		// TODO Auto-generated method stub
+		return super.deleteObjectById(nameSpace+"deleteSysParamNodeBySysParamId", sysParamId);
+	}
+
+	@Override
+	public int insertSysParam(SysParam sysParam) {
+		// TODO Auto-generated method stub
+		return super.saveObject(nameSpace+"saveSysParam", sysParam);
+	}
+
+	@Override
+	public List<SysParam> querySysParamListPage(SysParam sysParam,int pageIndex,int pageSize) {
+		// TODO Auto-generated method stub
+		List<SysParam> list = super.queryForList(nameSpace+"getSysParamList",sysParam,pageIndex,pageSize);
+		return list;
+	}
+	
+	public List<SysParam> querySysParamList(SysParam sysParam){
+		List<SysParam> list = super.queryForList(nameSpace+"getAllSysParamList",sysParam);
+		return list;
+	}
+	
+	public List<SysParam> getSysParamListByOverride(SysParam sysParam){
+		List<SysParam> list = super.queryForList(nameSpace+"getSysParamListByOverride",sysParam);
+		return list;
+	}
+
+	@Override
+	public Long getSysParamPageTotal(SysParam sysParam) {
+		// TODO Auto-generated method stub
+		Long count = super.getCount(nameSpace+"getSysParamTotal",sysParam);
+		return count;
+	}
+
+}

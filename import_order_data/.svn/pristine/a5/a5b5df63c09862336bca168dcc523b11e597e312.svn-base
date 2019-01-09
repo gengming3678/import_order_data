@@ -1,0 +1,105 @@
+package com.palline.chart.controller;
+
+import java.util.List;
+
+import javax.annotation.Resource;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.alibaba.fastjson.JSON;
+import com.palline.chart.entity.ChartManager;
+import com.palline.chart.service.imp.ChartManagerServiceImp;
+import com.palline.common.util.Constant;
+import com.palline.common.util.StringUtil;
+import com.palline.common.util.TipInfo;
+import com.palline.system.service.imp.NodeServiceImp;
+
+/**
+ * Copyright (C), 2015-8-10, 上海蓬海涞讯数据技术有限公司
+ * @author gmm
+ * @version 1.0
+ * @date 2015-8-10
+ */
+@Controller
+@RequestMapping("/chartManager")
+public class ChartManagerController {	
+	@Resource
+	private ChartManagerServiceImp chartManagerServiceImp;
+	@Resource
+	private NodeServiceImp nodeServiceImp;
+	
+	/**
+	 * 报表导航
+	 **/
+
+	@RequestMapping(value = "/list.do")
+	public String list(Model model) {
+		return "chartManager/chartManagerList";
+	}
+	
+	/**
+	 * 报表维护拉取数据
+	 **/
+	@ResponseBody
+	@RequestMapping(value = "/getJsonChartManagers.do")
+	public List<ChartManager> getJsonChartManagers(@RequestParam("nodeName") String nodeName) {
+		ChartManager chartManager = new ChartManager();
+		chartManager.setNodeName(StringUtil.strToUtf8(nodeName));
+		List<ChartManager> list = chartManagerServiceImp.findChartManagerList(chartManager);
+		return list;
+	}
+	
+	/**
+	 * 报表新增数据
+	 **/
+	@ResponseBody
+	@RequestMapping(value = "/add.do",method=RequestMethod.POST)
+	public Object add(@RequestParam("json") String json) {
+		ChartManager chartManager=JSON.parseObject(json,ChartManager.class);
+		int reportId = chartManagerServiceImp.insertChartManager(chartManager);
+		if(reportId>0){
+			Integer[] nodeIds = chartManager.getNodeIds();
+			for (int i = 0; i < nodeIds.length; i++) {
+				nodeServiceImp.updateNodeReportId(nodeIds[i],chartManager.getId());
+			}
+			return new TipInfo(Constant.SUCCESS,"操作成功!");
+		}else{
+			return new TipInfo(Constant.FAILTURE,"操作失败!");
+		}
+	}
+	
+	/**
+	 * 图形报表修改数据
+	 **/
+	@ResponseBody
+	@RequestMapping(value = "/edit.do",method=RequestMethod.POST)
+	public Object edit(@RequestParam("json") String json) {
+		ChartManager chartManager = JSON.parseObject(json,ChartManager.class);
+		int result = chartManagerServiceImp.updateChartManager(chartManager);
+		if(result>0){
+			return new TipInfo(Constant.SUCCESS,"操作成功!");
+		}else{
+			return new TipInfo(Constant.FAILTURE,"操作失败!");
+		}
+	}
+	
+	/**
+	 * 报表删除数据
+	 **/
+	@ResponseBody
+	@RequestMapping(value = "/delete.do",method=RequestMethod.POST)
+	public Object delete(@RequestParam("id") Integer id) {
+		int result = chartManagerServiceImp.deleteChartManagerById(id);
+		if(result>0){
+			return new TipInfo(Constant.SUCCESS,"操作成功!");
+		}else{
+			return new TipInfo(Constant.FAILTURE,"操作失败!");
+		}
+	}
+
+}

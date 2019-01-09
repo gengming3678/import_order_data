@@ -1,0 +1,62 @@
+package com.palline.rewardrule.service.imp;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.palline.rewardrule.dao.imp.SysParamDaoImp;
+import com.palline.rewardrule.entity.SysParam;
+import com.palline.rewardrule.service.SysParamService;
+
+@Service
+public class SysParamServiceImp implements SysParamService{
+
+	@Autowired
+	private SysParamDaoImp sysParamDaoImp;
+
+	@Override
+	public List<SysParam> querySysParamListPage(SysParam sysParam, int pageIndex, int pageSize) {
+		// TODO Auto-generated method stub
+		return sysParamDaoImp.querySysParamListPage(sysParam,pageIndex,pageSize);
+	}
+
+	public List<SysParam> querySysParamList(SysParam sysParam){
+		return sysParamDaoImp.querySysParamList(sysParam);
+	}
+	
+	public List<SysParam> getSysParamListByOverride(SysParam sysParam){
+		return sysParamDaoImp.getSysParamListByOverride(sysParam);
+	}
+	@Override
+	public Long getSysParamPageTotal(SysParam sysParam) {
+		// TODO Auto-generated method stub
+		return sysParamDaoImp.getSysParamPageTotal(sysParam);
+	}
+
+
+
+	@Override
+	public int updateSysParam(SysParam sysParam) {
+		// TODO Auto-generated method stub
+		return sysParamDaoImp.updateSysParam(sysParam);
+	}
+
+	@Override
+	public int deleteSysParamById(Integer id) {
+		// TODO Auto-generated method stub
+		return sysParamDaoImp.deleteSysParamById(id);
+	}
+
+	public int deleteSysParamNodeBySysParamId(Integer sysParamId){
+		return sysParamDaoImp.deleteSysParamNodeBySysParamId(sysParamId);
+	}
+	@Override
+	public int insertSysParam(SysParam sysParam) {
+		// TODO Auto-generated method stub
+		return sysParamDaoImp.insertSysParam(sysParam);
+	}
+
+	
+	
+}

@@ -1,0 +1,56 @@
+package com.palline.common.plugin;
+
+import java.util.Date;
+import java.util.List;
+
+import javax.annotation.Resource;
+
+import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationListener;
+import org.springframework.stereotype.Repository;
+
+import com.palline.rewardrule.entity.RewardRule;
+import com.palline.rewardrule.service.imp.RewardRuleServiceImp;
+
+@SuppressWarnings("rawtypes")
+@Repository
+public class InitData implements ApplicationListener{
+
+	@Resource
+	private RewardRuleServiceImp rewardRuleServiceImp;
+	private boolean isRun=false;
+	@Override
+	public void onApplicationEvent(ApplicationEvent arg0) {
+		// TODO Auto-generated method stub
+		Long count = null;
+		if(!isRun){
+			 count = rewardRuleServiceImp.findIfExsitRewardRuleList(null);
+			 isRun=true;//只运行一次
+			if(count<=0){
+					List<RewardRule> list22 = rewardRuleServiceImp.getInitDataRewardRuleList();
+					  for (RewardRule rewardRule2:list22) {
+						for (int i = 0; i < 3; i++) {
+							if(i==0){
+								rewardRule2.setTiDuiTypeId(1);
+								rewardRule2.setTiDuiName("第一梯队");
+							}else if(i==1){
+								rewardRule2.setTiDuiTypeId(2);
+								rewardRule2.setTiDuiName("第二梯队");
+							}else if(i==2){
+								rewardRule2.setTiDuiTypeId(3);
+								rewardRule2.setTiDuiName("第三梯队");
+							}
+							rewardRule2.setUpdateTime(new Date());
+							//删除之前的当前表
+							//rewardRuleServiceImp.deleteByDeptIdAndTiDui(rewardrule);
+							//同时存入当前表和历史表中》》当前表只用来页面显示，历史表用来查询历史
+							 rewardRuleServiceImp.insertRewardRule(rewardRule2);
+							 rewardRuleServiceImp.insertRewardRuleHistory(rewardRule2);
+						}
+					}
+				}
+		 
+		}
+	}
+
+}

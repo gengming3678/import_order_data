@@ -1,0 +1,181 @@
+package com.palline.rewardrule.controller;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.TypeReference;
+import com.palline.common.util.Constant;
+import com.palline.common.util.JsonUtil;
+import com.palline.common.util.PageData;
+import com.palline.common.util.StringUtil;
+import com.palline.common.util.TipInfo;
+import com.palline.rewardrule.entity.Dept;
+import com.palline.rewardrule.entity.SysParam;
+import com.palline.rewardrule.service.imp.DeptServiceImp;
+import com.palline.rewardrule.service.imp.SysParamServiceImp;
+import com.palline.system.entity.IdNameEntity;
+import com.palline.system.entity.KeyValueCheck;
+
+/**
+ * Copyright (C), 2015-8-10, 上海蓬海涞讯数据技术有限公司
+ * @author gmm
+ * @version 1.0
+ * @date 2015-8-10
+ */
+@Controller
+@RequestMapping("/dept")
+public class DeptController {	
+	@Resource
+	private DeptServiceImp deptServiceImp;
+	
+	@Resource
+	private SysParamServiceImp sysParamServiceImp;
+	
+	/**
+	 * 科室导航
+	 **/
+
+	@RequestMapping(value = "/list.do")
+	public String list(Model model) {
+		model.addAttribute("pageSize", Constant.PAGE_SIZE);
+		return "dept/deptList";
+	}
+	
+	/**
+	 * 科室维护拉取数据
+	 **/
+	@ResponseBody
+	@RequestMapping(value = "/getJsonDepts.do")
+	public PageData<Dept> getJsonDepts(@RequestParam("page") Integer pageIndex,@RequestParam("findName") String findName,HttpServletResponse response, HttpServletRequest request) {
+		Dept dept = new Dept();
+		dept.setCode(StringUtil.strToUtf8(findName));
+		dept.setName(StringUtil.strToUtf8(findName));
+		Long total = deptServiceImp.getDeptPageTotal(dept);
+		List<Dept> list = deptServiceImp.queryDeptListPage(dept, pageIndex, Constant.PAGE_SIZE);
+		return new PageData<Dept>(total,list);
+	}
+	
+	/**
+	 * 科室新增数据
+	 **/
+	@ResponseBody
+	@RequestMapping(value = "/add.do",method=RequestMethod.POST)
+	public Object add(@RequestParam("json") String json) {
+		String jsonNew = JsonUtil.replaceAllOnOff(json);
+		Dept Dept=JSON.parseObject(jsonNew,Dept.class);
+		int result = deptServiceImp.insertDept(Dept);
+		if(result>0){
+			return new TipInfo(Constant.SUCCESS,"操作成功!");
+		}else{
+			return new TipInfo(Constant.FAILTURE,"操作失败!");
+		}
+	}
+	
+	/**
+	 * 科室参数值
+	 **/
+	@ResponseBody
+	@RequestMapping(value = "/findDeptParamValue.do",method=RequestMethod.POST)
+	public Object findDeptParamValue(@RequestParam("deptId") Integer deptId) {
+		int result = deptServiceImp.findDeptParamValue(deptId);
+		return result;
+	}
+	
+	/**
+	 * 科室修改数据
+	 **/
+	@ResponseBody
+	@RequestMapping(value = "/edit.do",method=RequestMethod.POST)
+	public Object edit(@RequestParam("json") String json) {
+		String jsonNew = JsonUtil.replaceAllOnOff(json);
+		Dept Dept=JSON.parseObject(jsonNew,Dept.class);
+		int result = deptServiceImp.updateDept(Dept);
+		if(result>0){
+			return new TipInfo(Constant.SUCCESS,"操作成功!");
+		}else{
+			return new TipInfo(Constant.FAILTURE,"操作失败!");
+		}
+	}
+	
+	/**
+	 * 科室删除数据
+	 **/
+	@ResponseBody
+	@RequestMapping(value = "/delete.do",method=RequestMethod.POST)
+	public Object delete(@RequestParam("id") Integer id) {
+		int result = deptServiceImp.deleteDeptById(id);
+		if(result>0){
+			return new TipInfo(Constant.SUCCESS,"操作成功!");
+		}else{
+			return new TipInfo(Constant.FAILTURE,"操作失败!");
+		}
+	}
+	
+	
+	@ResponseBody
+	@RequestMapping(value = "/findAllDeptList.do")
+	public List<IdNameEntity> findAllDeptList(HttpServletResponse response, HttpServletRequest request) {
+		Dept dept = new Dept();
+		List<IdNameEntity> list = deptServiceImp.findAllDeptList(dept);
+		return list;
+	}
+	
+	
+	
+	@ResponseBody
+	@RequestMapping(value = "/getSelectParamsByDeptId.do")
+	public List<KeyValueCheck> getSelectParamsByDeptId(
+			@RequestParam("parentId") Integer parentId,
+			@RequestParam("id") Integer id,
+			@RequestParam("deptId") Integer deptId,
+			HttpServletResponse response, HttpServletRequest request,Model model) {
+		Dept deptEntity =new Dept();
+		deptEntity.setId(deptId);
+		List<Integer>  listCheck = deptServiceImp.getSelectParamsByDeptId(deptEntity);
+		
+		List<SysParam>  sysParamList = sysParamServiceImp.querySysParamList(null);
+		List<KeyValueCheck> keyValueCheckList=new ArrayList<KeyValueCheck>();
+		for (SysParam sysParam:sysParamList) {
+			KeyValueCheck keyValueCheck=new KeyValueCheck();
+			keyValueCheck.setId(String.valueOf(sysParam.getId()));
+			keyValueCheck.setText(sysParam.getParameterName());
+			keyValueCheck.setLeaf(true);
+			keyValueCheck.setExpanded(true);
+			keyValueCheck.setChecked(listCheck.contains(sysParam.getId())?true:false);
+			keyValueCheckList.add(keyValueCheck);
+		}
+		return keyValueCheckList;
+	}
+	
+	/**
+	 * 科室参数数据保存
+	 **/
+	@ResponseBody
+	@RequestMapping(value = "/saveDeptParam.do",method=RequestMethod.POST)
+	public Object saveDeptParam(@RequestParam("json") String json,
+			@RequestParam("deptId") Integer deptId) {
+		List<SysParam> list = JSON.parseObject(json,new TypeReference<List<SysParam>>(){}); 
+		deptServiceImp.deleteDeptParamByDeptId(deptId);
+		 for (SysParam sysParam:list) {
+			 Dept dept=new Dept();
+			 dept.setId(deptId);
+			 dept.setParamId(sysParam.getId());
+			 dept.setValue(sysParam.getValue());
+			 deptServiceImp.saveDeptParam(dept);
+		}
+		return new TipInfo(Constant.FAILTURE,"操作成功!");
+	}
+
+}

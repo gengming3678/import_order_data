@@ -1,0 +1,52 @@
+package com.palline.table.service.imp;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.palline.table.dao.imp.TableManagerDaoImp;
+import com.palline.table.entity.TableManager;
+import com.palline.table.service.TableManagerService;
+
+@Service
+public class TableManagerServiceImp implements TableManagerService{
+
+	@Autowired
+	private TableManagerDaoImp tableManagerDaoImp;
+
+	@Override
+	public List<TableManager> findReportList(TableManager report) {
+		// TODO Auto-generated method stub
+		return tableManagerDaoImp.findReportList(report);
+	}
+
+	@Override
+	public Long getReportPageTotal(TableManager report) {
+		// TODO Auto-generated method stub
+		return tableManagerDaoImp.getReportPageTotal(report);
+	}
+
+
+
+	@Override
+	public int updateReport(TableManager report) {
+		// TODO Auto-generated method stub
+		return tableManagerDaoImp.updateReport(report);
+	}
+
+	@Override
+	public int deleteReportById(Integer id) {
+		// TODO Auto-generated method stub
+		return tableManagerDaoImp.deleteReportById(id);
+	}
+
+	@Override
+	public int insertReport(TableManager report) {
+		// TODO Auto-generated method stub
+		return tableManagerDaoImp.insertReport(report);
+	}
+
+	
+	
+}

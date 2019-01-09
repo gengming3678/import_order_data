@@ -1,0 +1,72 @@
+package com.palline.table.entity;
+
+public class TableManager {
+
+	private Integer id;
+	private Integer nodeId;
+	private Integer[] nodeIds;
+	private String nodeName;
+	private String text;
+	private String  sqlContent;
+	private String  colName;
+	private boolean ifProcedure;
+	private String  queryCondition;
+	
+	public Integer getId() {
+		return id;
+	}
+	public void setId(Integer id) {
+		this.id = id;
+	}
+	public Integer getNodeId() {
+		return nodeId;
+	}
+	public void setNodeId(Integer nodeId) {
+		this.nodeId = nodeId;
+	}
+	public String getSqlContent() {
+		return sqlContent;
+	}
+	public void setSqlContent(String sqlContent) {
+		this.sqlContent = sqlContent;
+	}
+	public String getColName() {
+		return colName;
+	}
+	public void setColName(String colName) {
+		this.colName = colName;
+	}
+	public String getNodeName() {
+		return nodeName;
+	}
+	public void setNodeName(String nodeName) {
+		this.nodeName = nodeName;
+	}
+	public String getText() {
+		return text;
+	}
+	public void setText(String text) {
+		this.text = text;
+	}
+	public boolean isIfProcedure() {
+		return ifProcedure;
+	}
+	public void setIfProcedure(boolean ifProcedure) {
+		this.ifProcedure = ifProcedure;
+	}
+	public String getQueryCondition() {
+		return queryCondition;
+	}
+	public void setQueryCondition(String queryCondition) {
+		this.queryCondition = queryCondition;
+	}
+	public Integer[] getNodeIds() {
+		return nodeIds;
+	}
+	public void setNodeIds(Integer[] nodeIds) {
+		this.nodeIds = nodeIds;
+	}
+	
+	
+	
+}

@@ -1,0 +1,435 @@
+package com.palline.chart.service.imp;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowCountCallbackHandler;
+import org.springframework.stereotype.Service;
+
+import com.alibaba.fastjson.JSON;
+import com.palline.chart.dao.imp.ChartDisplayDaoImp;
+import com.palline.chart.entity.ChartManager;
+import com.palline.chart.service.ChartDisplayService;
+import com.palline.common.base.CommonBaseService;
+import com.palline.common.util.Constant;
+import com.palline.common.util.StringUtil;
+import com.palline.system.entity.IdNameEntity;
+import com.palline.system.entity.User;
+import com.palline.table.entity.QueryCondition;
+
+@Service
+public class ChartDisplayServiceImp extends CommonBaseService implements ChartDisplayService{
+
+	@Autowired
+	private ChartDisplayDaoImp chartDisplayDaoImp;
+	
+	@Autowired
+	private JdbcTemplate jdbcTemplate;
+
+	@Override
+	public ChartManager findChartManagerOne(Map<String, Object> map) {
+		// TODO Auto-generated method stub
+		return chartDisplayDaoImp.findChartManagerOne(map);
+	}
+
+	
+	
+	@Override
+	public List<Map<String, Object>> findChartDisplayList(
+			Map<String, Object> map, String sql) {
+		// TODO Auto-generated method stub
+		return chartDisplayDaoImp.findChartDisplayList(map, sql);
+	}
+	
+	public String findChartGridDisplayListPage(List<Map<String ,Object>> list,int pageIndex,int pageSize){
+		String curPageJson = super.getJsonByListMapPage(list, pageIndex, pageSize);
+		return curPageJson;
+	}
+	
+	public Map<String,Object> findQueryCondition(QueryCondition queryCondition,User user,Integer nodeId){
+		Map<String,Object> map=new HashMap<String, Object>();
+		String startDateOfMonth = StringUtil.isBlank(queryCondition.getStartDate())?StringUtil.startDateOfMonth():queryCondition.getStartDate();
+		String endDateOfMonth = StringUtil.isBlank(queryCondition.getEndDate())?StringUtil.endDateOfMonth():queryCondition.getEndDate();
+		String startYm = StringUtil.isBlank(queryCondition.getStartYm())?StringUtil.getCurMonth():queryCondition.getStartYm();
+		String endYm = StringUtil.isBlank(queryCondition.getEndYm())?StringUtil.getCurMonth():queryCondition.getEndYm();
+		String statYm = StringUtil.isBlank(queryCondition.getStatYm())?StringUtil.getCurMonth():queryCondition.getStatYm();
+		String statYmd = StringUtil.isBlank(queryCondition.getStatYmd())?StringUtil.getCurDate():queryCondition.getStatYmd();
+		
+		String deptName = StringUtil.isBlank(queryCondition.getDeptName())?"":queryCondition.getDeptName();
+
+		map.put("startDate", startDateOfMonth);//1
+		map.put("endDate", endDateOfMonth);//2
+		map.put("startYm", startYm);//3
+		map.put("endYm", endYm);//4
+		map.put("statYm", statYm);//5
+		map.put("statYmd", statYmd);//6
+		map.put("usrCode", user.getId());//7
+		map.put("deptName", StringUtil.strToUtf8(deptName));//8
+		map.put("nodeId", nodeId);//9
+		return map;
+	}
+	public Map<String,Object> findDisplayFieldNames(Map<String,Object> map){
+		ChartManager chartManager = chartDisplayDaoImp.findChartManagerOne(map);
+		//根据查询条件替换参数，返回相应表头，查询条件
+		Map<String,Object> colFieldsMap=new HashMap<String, Object>();
+		colFieldsMap = this.parseFieldsBySqlOrProcedure(chartManager,map);
+		return colFieldsMap;
+	}
+	
+	public Map<String,Object> parseFieldsBySqlOrProcedure(ChartManager chartManager,Map<String,Object> map) {
+		Map<String,Object> colFieldsMap=new HashMap<String, Object>();
+		boolean ifProcedure = chartManager.isIfProcedure();
+		String sql = chartManager.getSqlContent();
+		if(ifProcedure){//存储where条件
+			sql = this.parseProcedureWhereCondition(map,sql);
+		}else{////sql where条件
+			sql = this.parseSqlWhereCondition(map,sql);
+		}
+		//1解析表格表头字段
+		List<Map<String,Object>> list = this.findChartDisplayList(map,sql);
+		Object[] coloumnNames = null;
+		if(list.size()>0){//默认查询第一行结果集是表头
+			Map<String,Object> mapColNames = list.get(0);
+			coloumnNames = mapColNames.values().toArray();
+		}
+		colFieldsMap.put("coloumnNames", coloumnNames);
+		//2根据sql解析出sql对应的列字段名字
+		RowCountCallbackHandler rcch = new RowCountCallbackHandler();  
+		this.jdbcTemplate.query(sql, rcch);
+		String[] coloumnFields = rcch.getColumnNames();
+		colFieldsMap.put("coloumnFields", coloumnFields);
+		//3组装
+		Integer levelNum=1;
+		List<IdNameEntity> listIdNameEntityOneLevel=new ArrayList<IdNameEntity>();
+		int count=0;
+		Object[] coloumnNamesObj = coloumnNames;
+		for (int i = 0; i < coloumnNamesObj.length; i++) {//一级
+			IdNameEntity idNameEntityOneLevel=new IdNameEntity();
+			String nameOneLevel = (String) coloumnNamesObj[i];
+			String codeOneLevel="";
+			if(coloumnFields!=null&&coloumnFields.length>1){
+			   codeOneLevel = coloumnFields[count];
+			   idNameEntityOneLevel.setName(nameOneLevel);
+			   idNameEntityOneLevel.setCode(codeOneLevel);
+				count++;
+			}
+			listIdNameEntityOneLevel.add(idNameEntityOneLevel);
+		}
+		colFieldsMap.put("listIdNames", listIdNameEntityOneLevel);
+		
+		colFieldsMap.put("coloumnFields", coloumnFields);
+		//4
+		colFieldsMap.put("nodeName", chartManager.getNodeName());
+		//5
+		colFieldsMap.put("sqlContent", sql);
+		//6
+		colFieldsMap.put("queryCondition", chartManager.getQueryCondition());
+		//7导出excel用
+		colFieldsMap.put("levelNum", levelNum);
+		return colFieldsMap;
+	}
+	
+	
+	public String parseSqlWhereCondition(Map<String,Object> map,String sql){
+		String startDate = (String) map.get("startDate");
+		String endDate = (String) map.get("endDate");
+		String startYm = (String) map.get("startYm");
+		String endYm = (String) map.get("endYm");
+		String statYm = (String) map.get("statYm");
+		String statYmd = (String) map.get("statYmd");
+		Integer nodeId = (Integer) map.get("nodeId");
+		Integer usrCode = (Integer) map.get("usrCode");
+		String deptName = (String) map.get("deptName");
+		String sqlStartDate = sql.replaceAll(Constant.START_DATE, "'"+startDate+"'");
+		String sqlEndDate = sqlStartDate.replaceAll(Constant.END_DATE, "'"+endDate+"'");
+		String sqlStartYm = sqlEndDate.replaceAll(Constant.START_YM, "'"+startYm+"'");
+		String sqlEndYm = sqlStartYm.replaceAll(Constant.END_YM, "'"+endYm+"'");
+		String sqlStatYm = sqlEndYm.replaceAll(Constant.STAT_YM, "'"+statYm+"'");
+		String sqlStatYmd = sqlStatYm.replaceAll(Constant.STAT_YMD, "'"+statYmd+"'");
+		
+		
+		String sqlUsrCode = sqlStatYmd.replaceAll(Constant.USR_CODE, ""+usrCode+"");
+		String sqlRptId = sqlUsrCode.replaceAll(Constant.RPT_ID, ""+nodeId+"");
+		
+		if(StringUtil.isBlank(deptName) || deptName.equals("undefined")){
+			String sqlReal = sqlRptId.replaceAll("like '%#deptName#%'", " is not null ");
+			return	sqlReal;
+		}else{
+			String sqlReal = sqlRptId.replaceAll(Constant.DEPT_NAME, ""+deptName+"");
+			return	sqlReal;
+		}
+	}
+	
+	public String parseProcedureWhereCondition (Map<String,Object> map,String sql){
+		String startDate = (String) map.get("startDate");
+		String endDate = (String) map.get("endDate");
+		String startYm = (String) map.get("startYm");
+		String endYm = (String) map.get("endYm");
+		String statYm = (String) map.get("statYm");
+		String statYmd = (String) map.get("statYmd");
+		Integer nodeId = (Integer) map.get("nodeId");
+		Integer usrCode = (Integer) map.get("usrCode");
+		String deptName = (String) map.get("deptName");
+		String sqlStartDate = sql.replaceAll(Constant.START_DATE, "'"+startDate+"'");
+		String sqlEndDate = sqlStartDate.replaceAll(Constant.END_DATE, "'"+endDate+"'");
+		String sqlStartYm = sqlEndDate.replaceAll(Constant.START_YM, "'"+startYm+"'");
+		String sqlEndYm = sqlStartYm.replaceAll(Constant.END_YM, "'"+endYm+"'");
+		String sqlStatYm = sqlEndYm.replaceAll(Constant.STAT_YM, "'"+statYm+"'");
+		String sqlStatYmd = sqlStatYm.replaceAll(Constant.STAT_YMD, "'"+statYmd+"'");
+		
+		String sqlUsrCode = sqlStatYmd.replaceAll(Constant.USR_CODE, ""+usrCode+"");
+		String sqlRptId = sqlUsrCode.replaceAll(Constant.RPT_ID, ""+nodeId+"");
+		
+		if(StringUtil.isBlank(deptName)){
+			String sqlReal = sqlRptId.replaceAll(Constant.DEPT_NAME, "''");
+			return	sqlReal;
+		}else{
+			String sqlReal = sqlRptId.replaceAll(Constant.DEPT_NAME, ""+deptName+"");
+			return	sqlReal;
+		}
+	}
+	
+	
+	@SuppressWarnings("deprecation")
+	public int exportExcelHeaders(HSSFSheet sheet,HSSFRow row1,
+			HSSFCellStyle style,Object[] coloumnNames){
+		int count=0;
+		for (int i = 0; i < coloumnNames.length; i++) {//一级
+			Object nameOneLevel = coloumnNames[i];
+			HSSFCell cell1 = row1.createCell((short) (count));
+			cell1.setCellType(HSSFCell.CELL_TYPE_STRING);
+			cell1.setCellValue(nameOneLevel==null?"":nameOneLevel.toString());
+			cell1.setCellStyle(style);
+			count++;
+		}
+		for (int i = 0; i < count; i++) {
+			sheet.setColumnWidth((short)i, (short)6000);
+		}
+		return 0;
+	}
+
+	@SuppressWarnings("deprecation")
+	public void exportExcelDatas(HSSFSheet sheet,List<Map<String,Object>> list,String[] coloumnFields,Integer crossLineNum){
+		int rowSize=list.size();
+		for (int i = 1; i < rowSize; i++) {
+			HSSFRow row = sheet.createRow(crossLineNum+i);
+			Map<String,Object> map = list.get(i);
+			for (int j = 0; j < map.size(); j++) {
+				String code = coloumnFields[j];//取出字段
+				Object obj = map.get(code); //name =  ;//得到字段对应的值
+				HSSFCell cell0 = row.createCell((short) j);
+		        cell0.setCellType(HSSFCell.CELL_TYPE_STRING);
+		        if(obj!=null){
+		        	 cell0.setCellValue(obj.toString());
+		        }else{
+		        	 cell0.setCellValue(""); 
+		        }
+			}
+		}
+	}
+
+	@Override
+	public String parseBarJsonByList(List<Map<String, Object>> list,ChartManager chartManager) {
+		Collection<Object> coloumnNames = null;
+		if(list.size()>0){//默认查询第一行结果集是表头
+			Map<String,Object> mapColNames = list.get(0);
+			coloumnNames = this.removeFirstElement(mapColNames);
+		}
+		Object[] legendObjs = this.getFirstElement(list);
+		String str = " { "+
+				" tooltip : { "+
+				"     trigger: 'axis' "+
+				" }, "+
+				" legend: { "+
+				"     data:"+JSON.toJSONString(legendObjs)+" "+
+				" }, "+
+				" calculable : true, "+
+				" xAxis : [ "+
+				"     { "+
+				"         type : 'category', "+
+				"         data : "+JSON.toJSONString(coloumnNames)+" "+
+				"     } "+
+				" ], "+
+				" yAxis : [ "+
+				"     { "+
+				"         type : 'value' "+
+				"     } "+
+				" ], "+
+				" series : [ ";
+				        //数据显示
+						for (int i = 1; i < list.size(); i++) {
+							Map<String,Object> mapDept = list.get(i);
+							Collection<Object> valuesRemoveFirst = mapDept.values();
+							Object[] obj = valuesRemoveFirst.toArray();
+							String objName= (String) obj[0];
+							Collection<Object> mapDepts =  this.removeFirstElement(mapDept);
+							//混合图形显示
+							String specialLine = chartManager.getSpecialLine();
+							String type = specialLine.contains(objName)?"line":"bar";
+							if(i==list.size()-1){
+								str +=  "     { "+
+										"         name:'"+objName+"', "+
+										"         type:'"+type+"', "+
+										"         data: "+JSON.toJSONString(mapDepts)+" "+
+										"     } ";
+							}else{
+								str +=  "     { "+
+										"         name:'"+objName+"', "+
+										"         type:'"+type+"', "+
+										"         data:"+JSON.toJSONString(mapDepts)+" "+
+										"     } ,";
+							}
+							
+						}
+				
+				str += 	" ] "+
+						" } ";
+		return str;
+	}
+
+	@Override
+	public String parseLineJsonByList(List<Map<String, Object>> list,ChartManager chartManager) {
+		Collection<Object> coloumnNames = null;
+		if(list.size()>0){//默认查询第一行结果集是表头
+			Map<String,Object> mapColNames = list.get(0);
+			coloumnNames = this.removeFirstElement(mapColNames);
+		}
+		Object[] legendObjs = this.getFirstElement(list);
+		String str = " { "+
+				" tooltip : { "+
+				"     trigger: 'axis' "+
+				" }, "+
+				" legend: { "+
+				"     data:"+JSON.toJSONString(legendObjs)+" "+
+				" }, "+
+				" calculable : true, "+
+				" xAxis : [ "+
+				"     { "+
+				"         type : 'category', "+
+				"         data : "+JSON.toJSONString(coloumnNames)+" "+
+				"     } "+
+				" ], "+
+				" yAxis : [ "+
+				"     { "+
+				"         type : 'value' "+
+				"     } "+
+				" ], "+
+				" series : [ ";
+		        //数据显示
+				for (int i = 1; i < list.size(); i++) {
+					Map<String,Object> mapDept = list.get(i);
+					Collection<Object> valuesRemoveFirst = mapDept.values();
+					Object[] obj = valuesRemoveFirst.toArray();
+					String objName = (String) obj[0];
+					Collection<Object> mapDepts =  this.removeFirstElement(mapDept);
+					//混合图形显示
+					String specialLine = chartManager.getSpecialLine();
+					String type = specialLine.contains(objName)?"bar":"line";
+					if(i==list.size()-1){
+						str +=  "     { "+
+								"         name:'"+objName+"', "+
+								"         type:'"+type+"', "+
+								"         data: "+JSON.toJSONString(mapDepts)+" "+
+								"     } ";
+					}else{
+						str +=  "     { "+
+								"         name:'"+objName+"', "+
+								"         type:'"+type+"', "+
+								"         data:"+JSON.toJSONString(mapDepts)+" "+
+								"     } ,";
+					}
+					
+				}
+				
+		str += 	" ] "+
+				" } ";
+		return str;
+	}
+
+	@Override
+	public String parsePieJsonByList(List<Map<String, Object>> list) {
+		String name = null;
+		if(list.size()>0){//默认查询第一行结果集是表头
+			Map<String,Object> mapColNames = list.get(0);
+			Collection<Object> coloumnNames = this.removeFirstElement(mapColNames);
+			Object[] namesObj=coloumnNames.toArray();
+			name = (String) namesObj[0];
+		}
+		Object[] legendObjs = this.getFirstElement(list);
+		String str =" { "+
+				"  legend: {  "+
+				"      orient : 'horizontal', "+//horizontal,vertical
+				"      x : 'center', "+
+				"      data: "+JSON.toJSONString(legendObjs)+""+
+				"  }, "+
+				"  tooltip : { "+
+				"      trigger: 'item', "+
+				"      formatter: '{a} <br/>{b} : {c} ({d}%)' "+
+				"  }, "+
+				" calculable : true, "+
+				" series : [ "+
+				"     { "+
+				"         name:'"+name+"', "+
+				"         type:'pie', "+
+				"         radius : '50%', "+
+				"         center: ['50%', '50%'], "+
+				"         data:[ ";
+					//数据显示
+					for (int i = 1; i < list.size(); i++) {
+						Map<String,Object> mapDept = list.get(i);
+						Collection<Object> valuesRemoveFirst = mapDept.values();
+						Object[] obj = valuesRemoveFirst.toArray();
+						if(i==list.size()-1){
+							str +=  "             {value:"+obj[1]+", name:'"+obj[0]+"'} ";
+						}else {
+							str +=  "             {value:"+obj[1]+", name:'"+obj[0]+"'}, ";
+						}
+					}
+			str +=	"         ] "+
+					"     } "+
+					" ] "+
+					" }"; 
+			                    
+		return str;
+	}
+
+
+	public  Collection<Object> removeFirstElement(Map<String,Object> map) {
+		Collection<Object> coloumnNames=map.values();
+		int count=0;
+		for (Object obj2:coloumnNames) {
+			if(obj2==null){
+				coloumnNames.remove(obj2);
+				break;
+			}else if(count==0){
+				coloumnNames.remove(obj2);
+				break;
+			}
+			count++;
+		}
+		return coloumnNames;
+	}
+	
+	
+	public  Object[] getFirstElement(List<Map<String,Object>> list) {
+		Object[] objs = new Object[list.size()-1];
+		for (int i = 1; i < list.size(); i++) {
+			Map<String,Object> mapDept = list.get(i);
+			Collection<Object> valuesRemoveFirst = mapDept.values();
+			Object[] objsLine = valuesRemoveFirst.toArray();
+			objs[i-1]=objsLine[0];
+		}
+		return objs;
+	}
+	
+		
+}

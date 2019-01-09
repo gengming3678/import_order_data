@@ -1,0 +1,52 @@
+package com.palline.rewardrule.service.imp;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.palline.rewardrule.dao.imp.CardinalNumDaoImp;
+import com.palline.rewardrule.entity.CardinalNum;
+import com.palline.rewardrule.service.CardinalNumService;
+
+@Service
+public class CardinalNumServiceImp implements CardinalNumService{
+
+	@Autowired
+	private CardinalNumDaoImp CardinalNumDaoImp;
+
+	@Override
+	public List<CardinalNum> queryCardinalNumListPage(CardinalNum cardinalNum,int pageIndex,int pageSize) {
+		// TODO Auto-generated method stub
+		return CardinalNumDaoImp.queryCardinalNumListPage(cardinalNum,pageIndex,pageSize);
+	}
+
+	@Override
+	public Long getCardinalNumPageTotal(CardinalNum cardinalNum) {
+		// TODO Auto-generated method stub
+		return CardinalNumDaoImp.getCardinalNumPageTotal(cardinalNum);
+	}
+
+
+
+	@Override
+	public int updateCardinalNum(CardinalNum cardinalNum) {
+		// TODO Auto-generated method stub
+		return CardinalNumDaoImp.updateCardinalNum(cardinalNum);
+	}
+
+	@Override
+	public int deleteCardinalNumById(Integer id) {
+		// TODO Auto-generated method stub
+		return CardinalNumDaoImp.deleteCardinalNumById(id);
+	}
+
+	@Override
+	public int insertCardinalNum(CardinalNum cardinalNum) {
+		// TODO Auto-generated method stub
+		return CardinalNumDaoImp.insertCardinalNum(cardinalNum);
+	}
+
+	
+	
+}

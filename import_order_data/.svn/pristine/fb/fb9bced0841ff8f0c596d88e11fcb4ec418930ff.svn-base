@@ -1,0 +1,281 @@
+package com.palline.rewardrule.controller;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.util.Date;
+import java.util.List;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.TypeReference;
+import com.palline.common.util.Constant;
+import com.palline.common.util.PageData;
+import com.palline.common.util.StringUtil;
+import com.palline.common.util.TipInfo;
+import com.palline.rewardrule.entity.RewardRule;
+import com.palline.rewardrule.service.imp.RewardRuleServiceImp;
+
+/**
+ * Copyright (C), 2015-8-10, 上海蓬海涞讯数据技术有限公司
+ * @author gmm
+ * @version 1.0
+ * @date 2015-8-10
+ */
+@Controller
+@RequestMapping("/rewardRule")
+public class RewardRuleController {	
+	@Resource
+	private RewardRuleServiceImp rewardRuleServiceImp;
+	
+	/**
+	 * 计奖规则导航
+	 **/
+
+	@RequestMapping(value = "/list.do")
+	public String list(Model model) {
+		model.addAttribute(Constant.PAGE_SIZE_STR, Constant.PAGE_SIZE);
+		return "rewardRule/rewardRuleList";
+	}
+	
+	/**
+	 * 计奖规则维护数据>>历史数据
+	 **/
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@ResponseBody
+	@RequestMapping(value = "/getJsonRewardRule.do")
+	public PageData<RewardRule> getJsonRewardRule(HttpServletResponse response, HttpServletRequest request,
+			@RequestParam("page") Integer pageIndex,
+			@RequestParam("findName") String findName) {
+		RewardRule rewardRule=new RewardRule();
+		rewardRule.setDeptName(StringUtil.strToUtf8(findName));
+		Long total = rewardRuleServiceImp.getRewardRulePageTotal(rewardRule);
+		List<RewardRule> list = rewardRuleServiceImp.queryRewardRuleListPage(rewardRule,pageIndex,Constant.PAGE_SIZE);
+		return new PageData(total, list);
+	}
+	
+	
+	
+	/**
+	 * 计奖规则新增数据
+	 **/
+	@ResponseBody
+	@RequestMapping(value = "/add.do",method=RequestMethod.POST)
+	public Object add(@RequestParam("json") String json) {
+		List<RewardRule> list = JSON.parseObject(json,new TypeReference<List<RewardRule>>(){}); 
+		 for (RewardRule rewardrule:list) {
+			 rewardrule.setUpdateTime(new Date());
+		 	//删除之前的当前表根据tiDuiTypeId和deptId
+			rewardRuleServiceImp.deleteByDeptIdAndTiDui(rewardrule);
+			//同时存入当前表和历史表2张表中》》当前表只用来页面显示，历史表用来查询历史
+			rewardRuleServiceImp.insertRewardRule(rewardrule);
+			rewardRuleServiceImp.insertRewardRuleHistory(rewardrule);
+		}
+		return new TipInfo(Constant.SUCCESS,"操作成功!");
+	}
+	
+	/**
+	 * 计奖规则修改数据
+	 **/
+	/*
+	@ResponseBody
+	@RequestMapping(value = "/edit.do",method=RequestMethod.POST)
+	public Object edit(@RequestParam("json") String json) {
+		String jsonNew = JsonUtil.replaceAllOnOff(json);
+		RewardRule rewardrule=JSON.parseObject(jsonNew,RewardRule.class);
+		rewardrule.setUpdateTime(new Date());
+		//修改的话，同时修改当前表和历史表》》当前表只用来页面显示，历史表用来查询历史
+		int result = rewardRuleServiceImp.updateRewardRule(rewardrule);
+		int resultHis = rewardRuleServiceImp.updateRewardRuleHistory(rewardrule);
+		if(result>0 && resultHis>0){
+			return new TipInfo(Constant.SUCCESS,"操作成功!");
+		}else{
+			return new TipInfo(Constant.FAILTURE,"操作失败!");
+		}
+	}
+	*/
+	/**
+	 * 计奖规则删除数据
+	 **/
+	@ResponseBody
+	@RequestMapping(value = "/delete.do",method=RequestMethod.POST)
+	public Object delete(@RequestParam("id") Integer id) {
+		int result = rewardRuleServiceImp.deleteRewardRuleById(id);
+		int resultHis = rewardRuleServiceImp.delRewardRuleHistory(id);
+		if(result>0 && resultHis>0){
+			return new TipInfo(Constant.SUCCESS,"操作成功!");
+		}else{
+			return new TipInfo(Constant.FAILTURE,"操作失败!");
+		}
+	}
+	
+	@ResponseBody
+	@RequestMapping(value = "/getAllRewardRuleType.do")
+	public List<RewardRule>  getAllRewardRuleType() {
+		List<RewardRule> list = rewardRuleServiceImp.queryIdNameEntity();
+		return list;
+	}
+	
+	
+	/**
+	 * 计奖规则导航--病理科
+	 **/
+
+	@RequestMapping(value = "/listBingliKe.do")
+	public String listBingliKe(Model model) {
+		model.addAttribute(Constant.PAGE_SIZE_STR, Constant.PAGE_SIZE);
+		return "rewardRule/rewardRuleListBingliKe";
+	}
+	
+	/**
+	 * 计奖规则维护数据>>历史数据
+	 **/
+	@ResponseBody
+	@RequestMapping(value = "/getJsonRewardRuleBingLiKe.do")
+	public List<RewardRule> getJsonRewardRuleBingLiKe(HttpServletResponse response, HttpServletRequest request,
+			@RequestParam("page") Integer pageIndex) {
+		RewardRule rewardRule=new RewardRule();
+		rewardRule.setDeptName("病理科");
+		//Long total = rewardRuleServiceImp.getRewardRulePageTotal(rewardRule);
+		List<RewardRule> list = rewardRuleServiceImp.queryRewardRuleListPageBingLiKe(rewardRule,pageIndex,Constant.PAGE_SIZE);
+		return list;
+	}
+	
+	
+	/**
+	 * 计奖规则维护数据>>历史数据
+	 **/
+	@ResponseBody
+	@RequestMapping(value = "/getJsonRewardRuleHistory.do")
+	public List<RewardRule> getJsonRewardRuleHistory(HttpServletResponse response, HttpServletRequest request,
+			@RequestParam("deptId") Integer deptId,@RequestParam("tiDuiTypeId") Integer tiDuiTypeId) {
+		RewardRule rewardRule=new RewardRule();
+		rewardRule.setDeptId(deptId);
+		rewardRule.setTiDuiTypeId(tiDuiTypeId);
+		List<RewardRule> list = rewardRuleServiceImp.queryRewardRuleHistoryListPage(rewardRule);
+		return list;
+	}
+	
+	/**
+	 * 导出excel方法
+	 * @param request
+	 * @param response
+	 */
+    @RequestMapping("exportExcel")
+    public void exportExcel(HttpServletRequest request, HttpServletResponse response){
+        // 生成提示信息，
+        response.setContentType("application/vnd.ms-excel");
+        String codedFileName = null;
+        OutputStream fOut = null;
+        try
+        {
+            // 进行转码，使其支持中文文件名
+            codedFileName = java.net.URLEncoder.encode("手术记将规则", "UTF-8");
+            response.setHeader("content-disposition", "attachment;filename=" + codedFileName + ".xls");
+            // 产生工作簿对象
+            HSSFWorkbook workbook = new HSSFWorkbook();
+            HSSFCellStyle  style = workbook.createCellStyle();
+    		style.setFillForegroundColor(IndexedColors.CORNFLOWER_BLUE.getIndex());
+    		style.setFillPattern(CellStyle.SOLID_FOREGROUND);
+            //产生工作表对象
+            HSSFSheet sheet = workbook.createSheet();
+            //表头
+            HSSFRow row = sheet.createRow(0);
+            rewardRuleServiceImp.exportExcelHeaders(sheet,row,style);
+            //数据部分);
+            List<RewardRule> list = rewardRuleServiceImp.queryRewardRuleListPage(null,0,2000);
+            rewardRuleServiceImp.exportExcelDatas(sheet, list);
+            fOut = response.getOutputStream();
+            workbook.write(fOut);
+        }
+        catch (UnsupportedEncodingException e1)
+        {
+        	e1.printStackTrace();
+        }
+        catch (Exception e)
+        {
+        	e.printStackTrace();
+        }
+        finally
+        {
+            try
+            {
+                fOut.flush();
+                fOut.close();
+            }
+            catch (IOException e)
+            {}
+        }
+    }
+    
+    
+    
+    /**
+	 * 导出excel方法
+	 * @param request
+	 * @param response
+	 */
+    @RequestMapping("exportExcelBingLike")
+    public void exportExcelBingLike(HttpServletRequest request, HttpServletResponse response){
+        // 生成提示信息，
+        response.setContentType("application/vnd.ms-excel");
+        String codedFileName = null;
+        OutputStream fOut = null;
+        try
+        {
+            // 进行转码，使其支持中文文件名
+            codedFileName = java.net.URLEncoder.encode("病理科手术记将规则", "UTF-8");
+            response.setHeader("content-disposition", "attachment;filename=" + codedFileName + ".xls");
+            // 产生工作簿对象
+            HSSFWorkbook workbook = new HSSFWorkbook();
+            HSSFCellStyle  style = workbook.createCellStyle();
+    		style.setFillForegroundColor(IndexedColors.CORNFLOWER_BLUE.getIndex());
+    		style.setFillPattern(CellStyle.SOLID_FOREGROUND);
+            //产生工作表对象
+            HSSFSheet sheet = workbook.createSheet();
+            //表头
+            HSSFRow row = sheet.createRow(0);
+            rewardRuleServiceImp.exportExcelHeaders(sheet,row,style);
+            //数据部分
+            List<RewardRule> list = rewardRuleServiceImp.queryRewardRuleListPage(null,1,Constant.PAGE_SIZE);
+            rewardRuleServiceImp.exportExcelDatas(sheet, list);
+            fOut = response.getOutputStream();
+            workbook.write(fOut);
+        }
+        catch (UnsupportedEncodingException e1)
+        {
+        	e1.printStackTrace();
+        }
+        catch (Exception e)
+        {
+        	e.printStackTrace();
+        }
+        finally
+        {
+            try
+            {
+                fOut.flush();
+                fOut.close();
+            }
+            catch (IOException e)
+            {}
+        }
+    }
+    
+}

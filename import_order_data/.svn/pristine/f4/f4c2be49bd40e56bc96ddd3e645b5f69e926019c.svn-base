@@ -1,0 +1,46 @@
+package com.palline.rewardrule.dao;
+
+import java.util.List;
+
+import com.palline.rewardrule.entity.RewardRule;
+
+/**
+ * Copyright (C), 2015-8-10, 上海蓬海涞讯数据技术有限公司
+ * @author gmm
+ * @version 1.0
+ * @date 2015-8-10
+ */
+public interface RewardRuleDao {
+
+
+	public List<RewardRule> queryRewardRuleListPage(RewardRule rewardRule,int pageIndex, int pageSize);
+	
+	public List<RewardRule> queryRewardRuleListPageBingLiKe(RewardRule rewardRule,int pageIndex, int pageSize);
+	
+	public List<RewardRule> queryRewardRuleHistoryListPage(RewardRule rewardRule);
+	
+	public List<RewardRule> getInitDataRewardRuleList();
+	
+	public Long getRewardRulePageTotal(RewardRule rewardRule);
+	
+	public Long findIfExsitRewardRuleList(RewardRule rewardRule);
+	
+	
+	public int updateRewardRule(RewardRule rewardRule);
+	
+	public int updateRewardRuleHistory(RewardRule rewardRule);
+	
+	public int deleteRewardRuleById(Integer id);
+	
+	public int delRewardRuleHistory(Integer id);
+	
+	public int deleteByDeptIdAndTiDui(RewardRule rewardRule);
+	
+	public int insertRewardRule(RewardRule rewardRule);
+	
+	public int insertRewardRuleHistory(RewardRule rewardRule);
+	
+	public List<RewardRule> queryIdNameEntity();
+	
+	
+}

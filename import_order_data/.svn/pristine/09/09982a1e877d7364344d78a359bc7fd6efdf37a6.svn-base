@@ -1,0 +1,54 @@
+package com.palline.rewardrule.entity;
+
+
+public class SysParam {
+	
+	private Integer id;
+	private String parameterName;
+	private String description;
+	private Double value;
+	private boolean deptOverride;
+	private Integer deptId;
+	
+	public Integer getId() {
+		return id;
+	}
+	public void setId(Integer id) {
+		this.id = id;
+	}
+	public String getParameterName() {
+		return parameterName;
+	}
+	public void setParameterName(String parameterName) {
+		this.parameterName = parameterName;
+	}
+	public String getDescription() {
+		return description;
+	}
+	public void setDescription(String description) {
+		this.description = description;
+	}
+	public Double getValue() {
+		return value;
+	}
+	public void setValue(Double value) {
+		this.value = value;
+	}
+	public boolean isDeptOverride() {
+		return deptOverride;
+	}
+	public void setDeptOverride(boolean deptOverride) {
+		this.deptOverride = deptOverride;
+	}
+	public Integer getDeptId() {
+		return deptId;
+	}
+	public void setDeptId(Integer deptId) {
+		this.deptId = deptId;
+	}
+	
+	
+	
+
+	
+}

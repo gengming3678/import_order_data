@@ -1,0 +1,140 @@
+package com.palline.rewardrule.entity;
+
+import java.util.Date;
+/**
+ * 记奖规则
+ * @author Administrator
+ *
+ */
+public class RewardRule {
+	
+	private Integer id;
+	private Double beiShu;//倍数
+	private Double zengFuBiLi;//增幅比例
+	private Double tiQuBiLi;//提取比例
+	private Double jiJiangPoint;//记将点数
+	private Double zhouMo;//周末
+	private Double dianDanJia;//点单价
+	
+	private Double biaoZhun;//标准
+	private Integer deptId;
+	private String deptName;
+	private String deptType;
+	private Date ceateTime;
+	private Date updateTime;
+	
+	private String ceateTimeStr;
+	private String updateTimeStr;
+	
+	private Integer tiDuiTypeId;
+	private String tiDuiName;
+	
+
+	
+	public Double getBiaoZhun() {
+		return biaoZhun;
+	}
+	public void setBiaoZhun(Double biaoZhun) {
+		this.biaoZhun = biaoZhun;
+	}
+	public Integer getId() {
+		return id;
+	}
+	public void setId(Integer id) {
+		this.id = id;
+	}
+	public Double getBeiShu() {
+		return beiShu;
+	}
+	public void setBeiShu(Double beiShu) {
+		this.beiShu = beiShu;
+	}
+	public Double getZengFuBiLi() {
+		return zengFuBiLi;
+	}
+	public void setZengFuBiLi(Double zengFuBiLi) {
+		this.zengFuBiLi = zengFuBiLi;
+	}
+	public Double getZhouMo() {
+		return zhouMo;
+	}
+	public void setZhouMo(Double zhouMo) {
+		this.zhouMo = zhouMo;
+	}
+	public Double getDianDanJia() {
+		return dianDanJia;
+	}
+	public void setDianDanJia(Double dianDanJia) {
+		this.dianDanJia = dianDanJia;
+	}
+	public Date getCeateTime() {
+		return ceateTime;
+	}
+	public void setCeateTime(Date ceateTime) {
+		this.ceateTime = ceateTime;
+	}
+	public Date getUpdateTime() {
+		return updateTime;
+	}
+	public void setUpdateTime(Date updateTime) {
+		this.updateTime = updateTime;
+	}
+	public Integer getDeptId() {
+		return deptId;
+	}
+	public void setDeptId(Integer deptId) {
+		this.deptId = deptId;
+	}
+	public String getDeptName() {
+		return deptName;
+	}
+	public void setDeptName(String deptName) {
+		this.deptName = deptName;
+	}
+	
+	public String getTiDuiName() {
+		return tiDuiName;
+	}
+	public void setTiDuiName(String tiDuiName) {
+		this.tiDuiName = tiDuiName;
+	}
+	public String getCeateTimeStr() {
+		return ceateTimeStr;
+	}
+	public void setCeateTimeStr(String ceateTimeStr) {
+		this.ceateTimeStr = ceateTimeStr;
+	}
+	public String getUpdateTimeStr() {
+		return updateTimeStr;
+	}
+	public void setUpdateTimeStr(String updateTimeStr) {
+		this.updateTimeStr = updateTimeStr;
+	}
+	
+	public Integer getTiDuiTypeId() {
+		return tiDuiTypeId;
+	}
+	public void setTiDuiTypeId(Integer tiDuiTypeId) {
+		this.tiDuiTypeId = tiDuiTypeId;
+	}
+	public Double getTiQuBiLi() {
+		return tiQuBiLi;
+	}
+	public void setTiQuBiLi(Double tiQuBiLi) {
+		this.tiQuBiLi = tiQuBiLi;
+	}
+	public Double getJiJiangPoint() {
+		return jiJiangPoint;
+	}
+	public void setJiJiangPoint(Double jiJiangPoint) {
+		this.jiJiangPoint = jiJiangPoint;
+	}
+	public String getDeptType() {
+		return deptType;
+	}
+	public void setDeptType(String deptType) {
+		this.deptType = deptType;
+	}
+
+	
+}

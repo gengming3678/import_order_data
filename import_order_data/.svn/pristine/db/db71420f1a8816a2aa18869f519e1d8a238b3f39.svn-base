@@ -1,0 +1,52 @@
+package com.palline.chart.service.imp;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.palline.chart.dao.imp.ChartManagerDaoImp;
+import com.palline.chart.entity.ChartManager;
+import com.palline.chart.service.ChartManagerService;
+
+@Service
+public class ChartManagerServiceImp implements ChartManagerService{
+
+	@Autowired
+	private ChartManagerDaoImp chartManagerDaoImp;
+
+	@Override
+	public List<ChartManager> findChartManagerList(ChartManager chartManager) {
+		// TODO Auto-generated method stub
+		return chartManagerDaoImp.findChartManagerList(chartManager);
+	}
+
+	@Override
+	public Long getChartManagerPageTotal(ChartManager chartManager) {
+		// TODO Auto-generated method stub
+		return chartManagerDaoImp.getChartManagerPageTotal(chartManager);
+	}
+
+	
+
+	@Override
+	public int updateChartManager(ChartManager chartManager) {
+		// TODO Auto-generated method stub
+		return chartManagerDaoImp.updateChartManager(chartManager);
+	}
+
+	@Override
+	public int deleteChartManagerById(Integer id) {
+		// TODO Auto-generated method stub
+		return chartManagerDaoImp.deleteChartManagerById(id);
+	}
+
+	@Override
+	public int insertChartManager(ChartManager chartManager) {
+		// TODO Auto-generated method stub
+		return chartManagerDaoImp.insertChartManager(chartManager);
+	}
+
+	
+	
+}

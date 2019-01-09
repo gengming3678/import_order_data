@@ -1,0 +1,59 @@
+
+body{
+	background: #71B9E3;
+	font-family: "Helvetica Neue","Hiragino Sans GB","Microsoft YaHei","\9ED1\4F53",Arial,sans-serif;
+	color: #222;
+	font-size: 12px;
+}
+*{padding: 0px;margin: 0px;}
+.top_div{
+	background: #71B9E3;
+	width: 100%;
+	height: 130px;
+	vertical-align: middle;
+}
+.ipt{
+	border: 1px solid #d3d3d3;
+	padding: 10px 10px;
+	width: 220px;
+	border-radius: 4px;
+	padding-left: 5px;
+	-webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075);
+	box-shadow: inset 0 1px 1px rgba(0,0,0,.075);
+	-webkit-transition: border-color ease-in-out .15s,-webkit-box-shadow ease-in-out .15s;
+	-o-transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s;
+	transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s
+}
+.ipt:focus{
+	border-color: #66afe9;
+	outline: 0;
+	-webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075),0 0 8px rgba(102,175,233,.6);
+	box-shadow: inset 0 1px 1px rgba(0,0,0,.075),0 0 8px rgba(102,175,233,.6)
+}
+.u_logo{
+	background: url("../../../ext/img/username.png") no-repeat;
+	padding: 30px 30px;
+	position: absolute;
+	top: 43px;
+	left: 90px;
+
+}
+.p_logo{
+	background: url("../../../ext/img/password.png") no-repeat;
+	padding: 10px 10px;
+	position: absolute;
+	top: 12px;
+	left: 40px;
+}
+a{
+	text-decoration: none;
+}
+
+.LoginTitle{
+	color: #000;
+	font-weight:normal;
+	font-family:微软雅黑,宋体;
+	text-align: center;
+	word-spacing:8px;
+	letter-spacing:1px; 
+}

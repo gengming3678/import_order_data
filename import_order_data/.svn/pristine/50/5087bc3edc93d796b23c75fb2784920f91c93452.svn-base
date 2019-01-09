@@ -1,0 +1,40 @@
+package com.palline.rewardrule.entity;
+
+import java.util.List;
+
+public class Holiday {
+	
+	private Integer id;
+	private String  holidayDate;
+	private String  year;
+	private List<Holiday7Day>  holiday7DayList;
+	
+	public Integer getId() {
+		return id;
+	}
+	public void setId(Integer id) {
+		this.id = id;
+	}
+	public String getHolidayDate() {
+		return holidayDate;
+	}
+	public void setHolidayDate(String holidayDate) {
+		this.holidayDate = holidayDate;
+	}
+	public List<Holiday7Day> getHoliday7DayList() {
+		return holiday7DayList;
+	}
+	public void setHoliday7DayList(List<Holiday7Day> holiday7DayList) {
+		this.holiday7DayList = holiday7DayList;
+	}
+	public String getYear() {
+		return year;
+	}
+	public void setYear(String year) {
+		this.year = year;
+	}
+	
+	
+	
+
+}

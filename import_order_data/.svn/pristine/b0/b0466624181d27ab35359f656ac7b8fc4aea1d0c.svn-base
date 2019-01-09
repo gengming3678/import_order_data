@@ -1,0 +1,49 @@
+Ext.define('AutoForm',{
+	extend : 'Ext.form.Panel',
+	
+	column : 2,
+	
+	bodyStyle : {
+		paddingRight : 5,
+		paddingTop : 5
+	},
+	
+	initComponent : function(){
+		var me = this,grid = me.grid,store = me.grid.store,fields = store.model.getFields(),items = [],columns= grid.columns;
+		var len = columns.length,container;
+		for(var i = 0;i< len;i++){
+			var index = (i + 1),num = index % me.column;
+			if(!container){
+				container = me.getFiledContainer();
+			}
+			container.items.push({
+				xtype : 'textfield',
+				name : columns[i].dataIndex,
+				fieldLabel : columns[i].text
+			});
+			if(num == 0 || i == len - 1){
+				items.push(container);
+				container = null;
+			}
+		}
+		me.items = items;
+		me.items.push({
+			xtype : 'panel',
+			border : false,
+			buttonAlign : 'center',
+			buttons : [{text : '查询'},{text:'重置'}]
+		});
+		me.callParent();
+	},
+	
+    getFiledContainer : function(){
+    	return {
+	   		 xtype: 'fieldcontainer',
+             layout: 'hbox',
+             defaults: {
+                 flex: 1,
+                 labelWidth: 60,
+ 					labelAlign : 'right'
+             },items : []};
+    }
+});

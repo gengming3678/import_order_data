@@ -1,0 +1,38 @@
+package com.palline.chart.dao.imp;
+
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
+
+import com.palline.chart.dao.ChartDisplayDao;
+import com.palline.chart.entity.ChartManager;
+import com.palline.common.base.CommonBaseDao;
+
+
+@Repository
+public class ChartDisplayDaoImp extends CommonBaseDao<ChartManager, Integer> implements ChartDisplayDao{
+	private static final String nameSpace = "com.palline.chart.entity.ChartManager.";
+
+	@Resource
+	private JdbcTemplate jdbcTemplate;
+	
+	public ChartManager findChartManagerOne(Map<String ,Object> map){
+		ChartManager reportManager = (ChartManager) super.getSqlSession().selectOne(nameSpace+"findChartManagerOne",map);
+		return reportManager;
+	}
+
+
+	@Override
+	public List<Map<String, Object>> findChartDisplayList(
+			Map<String, Object> map, String sql) {
+		List<Map<String,Object>> list = jdbcTemplate.queryForList(sql);
+		return list;
+	}
+	
+	
+
+}

@@ -1,0 +1,90 @@
+package com.palline.rewardrule.entity;
+
+import java.util.Date;
+
+public class CardinalNum {
+	
+	private Integer id;
+	private Double cardinalNum;//基数
+	private Double allCardinalNum;//全部基数
+	private boolean ifformal;//正式true还是测试
+	
+	private String deptId;//正式还是测试
+	private String deptName;//正式还是测试
+	private String deptType;
+	private Double yuanSuanNum;
+	
+	private Date ceateTime;
+	private Date updateTime;
+	private String updateTimeStr;
+	public Integer getId() {
+		return id;
+	}
+	public void setId(Integer id) {
+		this.id = id;
+	}
+	public Double getCardinalNum() {
+		return cardinalNum;
+	}
+	public void setCardinalNum(Double cardinalNum) {
+		this.cardinalNum = cardinalNum;
+	}
+	public Double getAllCardinalNum() {
+		return allCardinalNum;
+	}
+	public void setAllCardinalNum(Double allCardinalNum) {
+		this.allCardinalNum = allCardinalNum;
+	}
+	
+	public String getDeptId() {
+		return deptId;
+	}
+	public void setDeptId(String deptId) {
+		this.deptId = deptId;
+	}
+	public String getDeptName() {
+		return deptName;
+	}
+	public void setDeptName(String deptName) {
+		this.deptName = deptName;
+	}
+	public Double getYuanSuanNum() {
+		return yuanSuanNum;
+	}
+	public void setYuanSuanNum(Double yuanSuanNum) {
+		this.yuanSuanNum = yuanSuanNum;
+	}
+	public Date getCeateTime() {
+		return ceateTime;
+	}
+	public void setCeateTime(Date ceateTime) {
+		this.ceateTime = ceateTime;
+	}
+	public Date getUpdateTime() {
+		return updateTime;
+	}
+	public void setUpdateTime(Date updateTime) {
+		this.updateTime = updateTime;
+	}
+	public String getUpdateTimeStr() {
+		return updateTimeStr;
+	}
+	public void setUpdateTimeStr(String updateTimeStr) {
+		this.updateTimeStr = updateTimeStr;
+	}
+	public boolean isIfformal() {
+		return ifformal;
+	}
+	public void setIfformal(boolean ifformal) {
+		this.ifformal = ifformal;
+	}
+	public String getDeptType() {
+		return deptType;
+	}
+	public void setDeptType(String deptType) {
+		this.deptType = deptType;
+	}
+
+	
+	
+}

@@ -1,0 +1,407 @@
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c"  uri="http://java.sun.com/jsp/jstl/core" %>
+<jsp:include page="../../common.jsp" />
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>报表系统</title>
+<script type="text/javascript" src="<%=request.getContextPath()%>/ext4/ComboTreeBox.js"></script>
+<script type="text/javascript">
+    Ext.require(['*']);
+        Ext.onReady(function () {
+
+
+			//菜单树
+			var treeStore_ = Ext.create('Ext.data.TreeStore', {
+			        nodeParam:'parentId', 
+	                proxy: {
+	                    type: 'ajax',
+	                    url: '<%=request.getContextPath()%>/node/getCheckNodesByNodeReportId.do'
+	                },
+	                fields: ['text','id','leaf','parentId','url','checked','expanded'],
+	                root:{ 
+	                    text:'根节点', 
+	                    expanded : true,//根节点是否展开 
+	                    id:0,
+	                    parentId:0
+	                  }/* ,
+	                autoLoad:true */
+			    });
+	            //监听load事件
+
+			var ComboTreeBox = Ext.create('ComboTreeBox',{
+ 				fieldLabel : '所属节点',
+ 				id: 'nodeIds',
+			    name: 'nodeIds',
+			    labelWidth: 100,
+ 				margin:'10 0 0 10',
+ 				hiddenName:'id',
+ 				width: 500 ,
+ 				displayField: "text",
+                valueField: "id",
+ 				store : treeStore_,
+ 				queryMode: 'remote'
+ 			});
+ 			
+ 		 
+            //***工具栏内容*** 
+            var tbar = Ext.create("Ext.toolbar.Toolbar", {
+                items: [
+                    {
+                        text: '添加',
+                        iconCls: 'a_add',
+                        handler: function () {
+                            AddDialog.setTitle("添加");
+                            AddDialog.setIconCls("a_add");
+                            if (typeof (ReportGrid) == "undefined") {
+                                return false;
+                            }
+                            if(Ext.getCmp("nodeIds")!=null){
+                            	Ext.getCmp("nodeIds").show();
+                            	Ext.getCmp("nodeName").hide(); 
+                            }
+                            treeStore_.load();
+                            AddForm.form.reset();
+                            Ext.getCmp("btnUpdate").hide();
+                            Ext.getCmp("btnAdd").show();
+                            AddDialog.show();
+                        }
+                    }, '-',
+                    {
+                        text: '修改',
+                        iconCls: 'a_edit',
+                        handler: function () {
+                            AddDialog.setTitle("修改");
+                            AddDialog.setIconCls("a_edit");
+                            if (typeof (ReportGrid) == "undefined") {
+                                return false;
+                            }
+                            AddForm.form.reset();
+                            var rows = ReportGrid.getView().getSelectionModel().getSelection();
+                            if (typeof (rows[0]) == "undefined") {
+                                Ext.Msg.alert("提示", "请选择要操作的行！");
+                                return false;
+                            }
+                            
+                            
+                            
+                            var nodeName = rows[0].data.nodeName;
+                            var nodeId = rows[0].data.nodeId;
+                            var id = rows[0].data.id;
+                            var colName = rows[0].data.colName;
+                            var sqlContent = rows[0].data.sqlContent;
+                            var queryCondition = rows[0].data.queryCondition;
+                            var ifProcedure = rows[0].data.ifProcedure;
+                            
+                            //alert(Ext.getCmp("nodeId"));
+                            var ss= Ext.getCmp("nodeIds");
+                            if(Ext.getCmp("nodeIds")!=null){
+                            	Ext.getCmp("nodeIds").setRawValue(nodeId);
+                            	Ext.getCmp("nodeName").setRawValue(nodeName);  
+                            	Ext.getCmp("nodeIds").setDisabled(true); 
+                            	Ext.getCmp("nodeIds").hide();
+                            	Ext.getCmp("nodeName").show();
+                            	
+                            }
+                            AddForm.form.findField("id").setValue(id);
+                            AddForm.form.findField("colName").setValue(colName);
+                            AddForm.form.findField("sqlContent").setValue(sqlContent);
+                            AddForm.form.findField("queryCondition").setValue(queryCondition);
+                            AddForm.form.findField("ifProcedure").setValue(ifProcedure);
+                            Ext.getCmp("btnUpdate").show();
+                            Ext.getCmp("btnAdd").hide(); 
+                            AddDialog.show();
+                        }
+                    },'-',
+                    {
+                        text: '删除',
+                        iconCls: 'a_del',
+                        handler: DelReport
+                    },"-","->",
+                    {
+                        emptyText: '所属节点',
+                        xtype:'textfield',
+                        id: 'findName',
+                        name: 'findName'
+			       },
+             		{ 
+	             		iconCls:"a_search",
+	             		text:"搜索",
+	             		handler:findReport
+             		}
+                ]
+            });
+          	//***工具栏内容结束*** 
+          	
+          	/**
+          		数据表格内容开始
+          	*/
+            var ReportGridStore = Ext.create('Ext.data.Store', {
+                proxy: {
+                    type: 'ajax',
+                    url: '<%=request.getContextPath()%>/tableManager/getJsonReports.do',
+                    method:'post',
+                    reader: {   //这里的reader为数据存储组织的地方
+                        type: 'json',
+                        idProperty : 'nodeId'
+                    }
+                },
+                fields: ['id','nodeName','nodeId','colName','sqlContent','text','ifProcedure','queryCondition'],
+                autoLoad: true  //即时加载数据
+            });
+            
+            ReportGridStore.on('beforeload', function (ReportGridStore, options) {  
+		        var new_params = {nodeName:Ext.getCmp('findName').value};
+		        Ext.apply(ReportGridStore.proxy.extraParams, new_params);   
+		    });
+		    
+            var ReportGrid = Ext.create('Ext.grid.Panel', {
+                tbar: tbar,
+                border: 0,
+                store: ReportGridStore,
+                autoHeight : true,
+        		autoScroll:true,
+                multiSelect: false,
+                selModel: { selType: 'checkboxmodel' },
+                renderTo: Ext.getBody(),
+			 	columns: [{  
+                    text: '所属节点',  //显示的表头列名称
+                    flex: 2,
+                    dataIndex: 'text',  //对应store的列字段名称
+                    menuDisabled:true,
+	 				sortable: false
+                },{  
+                    text: '表头名称',  //显示的表头列名称
+                    flex: 3,
+                    dataIndex: 'colName',  //对应store的列字段名称
+                    menuDisabled:true,
+	 				sortable: false
+                },{  
+                    text: '查询条件参数',  //显示的表头列名称
+                    flex: 1,
+                    dataIndex: 'queryCondition',  //对应store的列字段名称
+                    menuDisabled:true,
+	 				sortable: false
+                },{  
+                    text: '是否存储过程',  //显示的表头列名称
+                    flex: 1,
+                    dataIndex: 'ifProcedure',  //对应store的列字段名称
+                    menuDisabled:true,
+	 				sortable: false
+                },{  
+                    text: '数据来源',  //显示的表头列名称
+                    flex: 5,
+                    dataIndex: 'sqlContent',  //对应store的列字段名称
+                    menuDisabled:true,
+	 				sortable: false
+                }] 
+                , listeners: {
+                    //点击行触发事件
+                    itemclick: function (record, node) {
+                        //把列的qcid传递给QuesGridStore刷新对应的grid或tree
+                      //  QuesGridStore.load({ params: { csId: node.data.id } });
+                    }
+                }
+            });          
+			/**
+          	  数据表格内容结束
+          	*/
+
+ 
+			var AddForm = Ext.create("Ext.form.Panel", {
+			                border: false,
+			                id:'addReportForm',
+			                name:'addReportForm',
+			                fieldDefaults: {
+			                    msgTarget: 'side',  //提示信息在右旁边显示图标
+			                    labelWidth: 100,
+			                    align: "right",
+			                    regexText: '格式错误', //错误提示
+			                    allowBlank: false //不与许为空
+			                },
+			                defaults: {
+			                    padding: 10,
+			                    width: 500 
+			                },
+			                defaultType: "textfield",
+			                items: [
+			                     {
+			                         id: 'id',
+			                         name: 'id',
+			                         xtype : 'hidden'
+			                     },
+			                     ComboTreeBox,{
+			                         fieldLabel: '所属节点',
+			                         id: 'nodeName',
+			                         name: 'nodeName',
+			                         readOnly:true,
+			                         allowBlank: false
+			                     },{
+			                         fieldLabel: '表头名称',
+			                         id: 'colName',
+			                         name: 'colName',
+			                         xtype : 'textareafield',
+			                         height : 50,
+			                         width : 500,
+			                         allowBlank: false
+			                     },
+			                     {
+			                         fieldLabel: '数据来源',
+			                         xtype     : 'textareafield',
+			                         height : 150,
+			                         width : 500,
+			                         id: 'sqlContent',
+			                         name: 'sqlContent',
+			                         allowBlank: false
+			                     },
+			                     { 
+						            fieldLabel : '查询条件参数',
+						            allowBlank : false,
+						            id: 'queryCondition',
+			                        name: 'queryCondition'
+            					},{
+			                         fieldLabel: '是否存储过程',
+			                         xtype: "checkbox",
+			                         id: 'ifProcedure',
+			                         name: 'ifProcedure',
+			                         inputValue:true,
+			                         allowBlank: false
+			                     }
+			                ]
+			            });
+			            
+			      var AddDialog = Ext.create("Ext.window.Window", {
+			                iconCls: 'a_add',
+			                closeAction: 'close',        //窗口关闭的方式：hide/close
+			                resizable: false,
+			                closable: true,            //是否可以关闭
+			                modal: true,
+			                id:'addReportDialog',
+			                name:'addReportDialog',                //是否为模态窗口
+			                items: AddForm,
+			                /* width:680,
+			                height:450, */
+			                buttons: [{
+			                    text: '添加',
+			                    iconCls: 'a_save',
+			                    id: "btnAdd",
+			                    handler: function () {
+			                        //if (AddForm.form.isValid()) {
+			                                AddReport();
+			                        //}
+			                    }
+			                },{
+			                    text: '保存',
+			                    iconCls: 'a_save',
+			                    id: "btnUpdate",
+			                    handler: function () {
+			                        //if (AddForm.form.isValid()) {
+			                                UpdateReport();
+			                       // }
+			                    }
+			                },
+			                {
+			                    id: "btnCancel",
+			                    iconCls: 'a_cross',  //样式
+			                    text: '关闭',
+			                    handler: function () {
+			                        //重置AddForm.form表单
+			                        ReportGridStore.load();
+			                        AddDialog.close();
+			                    }
+			                }]
+			            });
+			            
+			            
+			            
+			           
+			
+			            //1 添加
+			            function AddReport() {
+			                Ext.Ajax.request({
+			                    method: "post",
+			                    url: "<%=request.getContextPath()%>/tableManager/add.do",
+			                    params: {json:JSON.stringify(AddForm.form.getValues())},
+			                    callback: function (options, success, response) {
+			                    	AddDialog.close();
+			                        if (success) {
+			                            var json = response.responseText;
+			                            json = Ext.decode(json);
+			                            ReportGridStore.load();
+			                            Ext.Msg.alert("提示", json.info);
+			                        }
+			                        else {
+			                            Ext.Msg.alert("提示", "系统繁忙");
+			                        }
+			                    }
+			                });
+			            }
+			           
+			            
+			            
+			            
+			            //2 修改
+			            function UpdateReport() {
+			           // alert(JSON.stringify(AddForm.form.getValues()));
+			                var rows = ReportGrid.getView().getSelectionModel().getSelection();
+			                if (typeof (rows[0]) == "undefined") {
+			                    Ext.Msg.alert("提示", "请选择要操作的行！");
+			                    return false;
+			                }
+			                Ext.Ajax.request({
+			                    method: "post",
+			                    url: "<%=request.getContextPath()%>/tableManager/edit.do",
+			                    params: {json: JSON.stringify(AddForm.form.getValues()) },
+			                    callback: function (options, success, response) {
+			                    	AddDialog.close();
+			                        if (success) {
+			                            var json = response.responseText;
+			                            json = Ext.decode(json);
+			                            ReportGridStore.load();
+			                            Ext.Msg.alert("提示", json.info);
+			                        }
+			                        else {
+			                            Ext.Msg.alert("提示", "系统繁忙");
+			                        }
+			                    }
+			                });
+			            }
+			            
+			             //3 删除
+			            function DelReport() {
+			                var rows = ReportGrid.getView().getSelectionModel().getSelection();
+			                if (typeof (rows[0]) == "undefined") {
+			                    Ext.Msg.alert("提示", "请选择要操作的行！");
+			                    return false;
+			                }
+			                Ext.Ajax.request({
+			                    method: "post",
+			                    url: "<%=request.getContextPath()%>/tableManager/delete.do",
+			                    params: { id: rows[0].data.id },
+			                    callback: function (options, success, response) {
+			                    	AddDialog.close();
+			                        if (success) {
+			                            var json = response.responseText;
+			                            json = Ext.decode(json);
+			                            ReportGridStore.load();
+			                            Ext.Msg.alert("提示", json.info);
+			                        }
+			                        else {
+			                            Ext.Msg.alert("提示", "系统繁忙");
+			                        }
+			                    }
+			                });
+			            } 
+			            
+			            //4查询
+			            function findReport(){
+			           		 ReportGridStore.load();
+			            }
+      		
+        });
+      
+    </script>  
+</head>  
+<body>
+</body>
+</html>

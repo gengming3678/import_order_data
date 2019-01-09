@@ -1,0 +1,113 @@
+package com.palline.rewardrule.service.imp;
+
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.palline.common.util.StringUtil;
+import com.palline.rewardrule.dao.imp.HolidayDaoImp;
+import com.palline.rewardrule.entity.Holiday;
+import com.palline.rewardrule.entity.Holiday7Day;
+import com.palline.rewardrule.service.HolidayService;
+
+@Service
+public class HolidayServiceImp implements HolidayService{
+
+	@Autowired
+	private HolidayDaoImp holidayDaoImp;
+
+
+	
+	public List<Holiday> findAllHolidayList(Map<String,Object> map){
+		return holidayDaoImp.findAllHolidayList(map);
+	}
+
+	public List<Holiday> findHolidayListByYear(String curYear){
+		List<Holiday> holidayList=new ArrayList<Holiday>();
+		String[] curMonths = StringUtil.getCurYearMonths(curYear);
+		for (int k = 0; k < curMonths.length; k++) {
+			Date nowDate = StringUtil.stringToDate(curMonths[k], "yyyy-MM");
+			Calendar cad = Calendar.getInstance();
+			cad.setTime(nowDate);
+			int day_month = cad.getActualMaximum(Calendar.DAY_OF_MONTH); // 获取当月天数
+			
+			List<Holiday7Day> holiday7DayList=new ArrayList<Holiday7Day>();
+			
+			//真正的日期
+			for (int i = 0; i <day_month; i++) {
+				String date = curMonths[k]+"-"+String.valueOf(i+1);
+				if(i==0){//判断当月第一天是周几，加空格
+					Calendar cadWeek = Calendar.getInstance();
+					Date nowDateWeek = StringUtil.stringToDate(date, "yyyy-MM-dd");
+					cadWeek.setTime(nowDateWeek);
+					int day_week = cadWeek.get(Calendar.DAY_OF_WEEK); // 获取当月天数
+					if(day_week==1){//周日的话，空格6个，把周日放到一周的最后一天
+						//放置空格
+						for (int j = 0; j < 7; j++) {
+							Holiday7Day holiday7Day=new Holiday7Day();
+							holiday7Day.setDayNum(null);
+							holiday7Day.setDate(null);
+							holiday7DayList.add(holiday7Day);
+						}
+					}else{
+						//放置空格
+						for (int j = 0; j < day_week-2; j++) {
+							Holiday7Day holiday7Day=new Holiday7Day();
+							holiday7Day.setDayNum(null);
+							holiday7Day.setDate(null);
+							holiday7DayList.add(holiday7Day);
+						}
+					}
+					
+				}
+				
+				Holiday7Day holiday7Day=new Holiday7Day();
+				holiday7Day.setDayNum(i+1);
+				holiday7Day.setDate(date);
+				holiday7DayList.add(holiday7Day);
+			}
+			Holiday holiday=new Holiday();
+			holiday.setHolidayDate(curMonths[k]);
+			holiday.setHoliday7DayList(holiday7DayList);
+			holidayList.add(holiday);
+		}
+		//数据保存已经选择的日期
+		Map<String,Object> map=new HashMap<String,Object>();
+		map.put("year", curYear);
+		List<Holiday> selectedHolidayList = this.findAllHolidayList(map);
+		List<String>  selectDates=new ArrayList<String>();
+		for (Holiday holiday:selectedHolidayList) {
+			selectDates.add(holiday.getHolidayDate());
+		}
+	    //查询日历,比对选中以保存的日期
+		for (Holiday holiday:holidayList) {
+			List<Holiday7Day> holiday7DayList = holiday.getHoliday7DayList();
+			for (Holiday7Day holiday7Day:holiday7DayList) {
+				String holiday7DayDate = holiday7Day.getDate();
+				holiday7Day.setIfchecked(selectDates.contains(holiday7DayDate));
+			}
+		}
+		return holidayList;
+	}
+	
+	@Override
+	public int deleteHolidayById(Integer id) {
+		// TODO Auto-generated method stub
+		return holidayDaoImp.deleteHolidayById(id);
+	}
+
+	@Override
+	public int insertHoliday(Holiday holiday) {
+		// TODO Auto-generated method stub
+		return holidayDaoImp.insertHoliday(holiday);
+	}
+
+	
+	
+}

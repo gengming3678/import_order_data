@@ -1,0 +1,342 @@
+package com.palline.table.service.imp;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowCountCallbackHandler;
+import org.springframework.stereotype.Service;
+
+import com.palline.common.base.CommonBaseService;
+import com.palline.common.util.Constant;
+import com.palline.common.util.StringUtil;
+import com.palline.system.entity.IdNameEntity;
+import com.palline.system.entity.User;
+import com.palline.table.dao.imp.TableDisplayDaoImp;
+import com.palline.table.entity.QueryCondition;
+import com.palline.table.entity.TableManager;
+import com.palline.table.service.TableDisplayService;
+
+@Service
+public class TableDisplayServiceImp extends CommonBaseService implements TableDisplayService{
+
+	@Autowired
+	private TableDisplayDaoImp reportDisplayDaoImp;
+	
+	@Resource
+	private JdbcTemplate jdbcTemplate;
+	
+	public String findReportDisplayListPage(List<Map<String ,Object>> list,int pageIndex,int pageSize){
+		String curPageJson = super.getJsonByListMapPage(list, pageIndex, pageSize);
+		return curPageJson;
+	}
+	public List<Map<String,Object>> queryReportDisplayListPage(Map<String ,Object> map,String sql,int pageIndex,int pageSize){
+		return reportDisplayDaoImp.queryReportDisplayListPage(map,sql,pageIndex,pageSize);
+	}
+
+	public List<Map<String,Object>> findReportDisplayList(Map<String,Object> map,String sql){
+		return reportDisplayDaoImp.findReportDisplayList(map,sql);
+	}
+	
+	public TableManager findReportDisplayOne(Map<String ,Object> map){
+		return reportDisplayDaoImp.findReportDisplayOne(map);
+	}
+	
+	public Map<String,Object> findQueryCondition(QueryCondition queryCondition,User user,Integer nodeId){
+		Map<String,Object> map=new HashMap<String, Object>();
+		String startDateOfMonth = StringUtil.isBlank(queryCondition.getStartDate())?StringUtil.startDateOfMonth():queryCondition.getStartDate();
+		String endDateOfMonth = StringUtil.isBlank(queryCondition.getEndDate())?StringUtil.endDateOfMonth():queryCondition.getEndDate();
+		String startYm = StringUtil.isBlank(queryCondition.getStartYm())?StringUtil.getCurMonth():queryCondition.getStartYm();
+		String endYm = StringUtil.isBlank(queryCondition.getEndYm())?StringUtil.getCurMonth():queryCondition.getEndYm();
+		String statYm = StringUtil.isBlank(queryCondition.getStatYm())?StringUtil.getCurMonth():queryCondition.getStatYm();
+		String statYmd = StringUtil.isBlank(queryCondition.getStatYmd())?StringUtil.getCurDate():queryCondition.getStatYmd();
+
+		map.put("startDate", startDateOfMonth);//1
+		map.put("endDate", endDateOfMonth);//2
+		map.put("startYm", startYm);//3
+		map.put("endYm", endYm);//4
+		map.put("statYm", statYm);//5
+		map.put("statYmd", statYmd);//6
+		map.put("usrCode", user.getId());//7
+		map.put("deptName", StringUtil.strToUtf8(queryCondition.getDeptName()));//8
+		map.put("nodeId", nodeId);//9
+		return map;
+	}
+	public Map<String,Object> findDisplayFieldNames(Map<String,Object> map){
+		TableManager reportManager = reportDisplayDaoImp.findReportDisplayOne(map);
+		//根据查询条件替换参数，返回相应表头，查询条件
+		Map<String,Object> colFieldsMap=new HashMap<String, Object>();
+		colFieldsMap = this.parseFieldsBySqlOrProcedure(reportManager,map);
+		return colFieldsMap;
+	}
+	
+	public Map<String,Object> parseFieldsBySqlOrProcedure(TableManager reportManager,Map<String,Object> map) {
+		Map<String,Object> colFieldsMap=new HashMap<String, Object>();
+		//1解析表格表头字段
+		String coloumnName = reportManager.getColName();
+		String[] coloumnNames=new String[]{};
+		if(!StringUtil.isBlank(coloumnName)){
+			    coloumnNames = coloumnName.split(",");
+		}
+		colFieldsMap.put("coloumnNames", coloumnNames);
+		//2根据sql解析出sql对应的列字段
+		String sql = reportManager.getSqlContent();
+		boolean ifProcedure = reportManager.isIfProcedure();
+		if(ifProcedure){//存储where条件
+			sql = this.parseProcedureWhereCondition(map,sql);
+		}else{//sql 的where条件
+			sql = this.parseSqlWhereCondition(map,sql);
+		}
+		RowCountCallbackHandler rcch = new RowCountCallbackHandler();  
+		this.jdbcTemplate.query(sql, rcch);
+		String[] coloumnFields = rcch.getColumnNames();
+		colFieldsMap.put("coloumnFields", coloumnFields);
+		//3组装
+		Integer levelNum=1;
+		List<IdNameEntity> listIdNameEntityOneLevel=new ArrayList<IdNameEntity>();
+		int count=0;
+		for (int i = 0; i < coloumnNames.length; i++) {//一级
+			IdNameEntity idNameEntityOneLevel=new IdNameEntity();
+			String nameOneLevel = coloumnNames[i];
+			String codeOneLevel="";
+			if(coloumnFields!=null&&coloumnFields.length>1){
+				   codeOneLevel = coloumnFields[count];
+			}
+			String[] nameRowColTwoLevel = nameOneLevel.split(Constant.ONE_LEVEL_SEPARATOR);
+			if(nameRowColTwoLevel.length>1){//二级
+				levelNum=2;
+				List<IdNameEntity> listIdNameRowColTwoLevel=new ArrayList<IdNameEntity>();
+				for (int j = 1; j < nameRowColTwoLevel.length; j++) {
+					IdNameEntity idNameEntityTwoLevel=new IdNameEntity();
+					String nameTwoLevel = nameRowColTwoLevel[j];
+					String codeTwoLevel="";
+					if(coloumnFields!=null&&coloumnFields.length>1){
+					       codeTwoLevel = coloumnFields[count];
+					}
+					idNameEntityTwoLevel.setName(nameTwoLevel);
+					idNameEntityTwoLevel.setCode(codeTwoLevel);
+					listIdNameRowColTwoLevel.add(idNameEntityTwoLevel);
+					String[] nameRowColsTreeLevel = nameTwoLevel.split(Constant.TWO_LEVEL_SEPARATOR);
+					if(nameRowColsTreeLevel.length>1){//三级
+						levelNum=3;
+						List<IdNameEntity> listIdNameRowColThreeLevel=new ArrayList<IdNameEntity>();
+						for (int k = 1; k < nameRowColsTreeLevel.length; k++) {
+							IdNameEntity idNameEntityThreeLevel=new IdNameEntity();
+							String nameThreeLevel = nameRowColsTreeLevel[k];
+							String codeThreeLevel="";
+							if(coloumnFields!=null&&coloumnFields.length>1){
+							       codeThreeLevel = coloumnFields[count];
+							}
+							idNameEntityThreeLevel.setName(nameThreeLevel);
+							idNameEntityThreeLevel.setCode(codeThreeLevel);
+							listIdNameRowColThreeLevel.add(idNameEntityThreeLevel);
+							count++;
+						}
+						idNameEntityTwoLevel.setName(nameRowColsTreeLevel[0]);
+						idNameEntityTwoLevel.setSubCells(listIdNameRowColThreeLevel);
+					}else{
+						count++;
+					}
+				}
+				idNameEntityOneLevel.setName(nameRowColTwoLevel[0]);
+				idNameEntityOneLevel.setSubCells(listIdNameRowColTwoLevel);
+			}else{
+				idNameEntityOneLevel.setName(nameOneLevel);
+				idNameEntityOneLevel.setCode(codeOneLevel);
+				count++;
+			}
+			listIdNameEntityOneLevel.add(idNameEntityOneLevel);
+		}
+		colFieldsMap.put("listIdNames", listIdNameEntityOneLevel);
+		
+		colFieldsMap.put("coloumnFields", coloumnFields);
+		//4
+		colFieldsMap.put("nodeName", reportManager.getNodeName());
+		//5
+		colFieldsMap.put("sqlContent", sql);
+		//6
+		colFieldsMap.put("queryCondition", reportManager.getQueryCondition());
+		//7导出excel用
+		colFieldsMap.put("levelNum", levelNum);
+		return colFieldsMap;
+	}
+	
+	
+	public String parseSqlWhereCondition(Map<String,Object> map,String sql){
+		String startDate = (String) map.get("startDate");
+		String endDate = (String) map.get("endDate");
+		String startYm = (String) map.get("startYm");
+		String endYm = (String) map.get("endYm");
+		String statYm = (String) map.get("statYm");
+		String statYmd = (String) map.get("statYmd");
+		Integer nodeId = (Integer) map.get("nodeId");
+		Integer usrCode = (Integer) map.get("usrCode");
+		String deptName = (String) map.get("deptName");
+		String sqlStartDate = sql.replaceAll(Constant.START_DATE, "'"+startDate+"'");
+		String sqlEndDate = sqlStartDate.replaceAll(Constant.END_DATE, "'"+endDate+"'");
+		String sqlStartYm = sqlEndDate.replaceAll(Constant.START_YM, "'"+startYm+"'");
+		String sqlEndYm = sqlStartYm.replaceAll(Constant.END_YM, "'"+endYm+"'");
+		String sqlStatYm = sqlEndYm.replaceAll(Constant.STAT_YM, "'"+statYm+"'");
+		String sqlStatYmd = sqlStatYm.replaceAll(Constant.STAT_YMD, "'"+statYmd+"'");
+		
+		
+		String sqlUsrCode = sqlStatYmd.replaceAll(Constant.USR_CODE, ""+usrCode+"");
+		String sqlRptId = sqlUsrCode.replaceAll(Constant.RPT_ID, ""+nodeId+"");
+		
+		if(StringUtil.isBlank(deptName) || deptName.equals("undefined")){
+			String sqlReal = sqlRptId.replaceAll("like '%#deptName#%'", " is not null ");
+			return	sqlReal;
+		}else{
+			String sqlReal = sqlRptId.replaceAll(Constant.DEPT_NAME, ""+deptName+"");
+			return	sqlReal;
+		}
+	}
+	
+	public String parseProcedureWhereCondition (Map<String,Object> map,String sql){
+		String startDate = (String) map.get("startDate");
+		String endDate = (String) map.get("endDate");
+		String startYm = (String) map.get("startYm");
+		String endYm = (String) map.get("endYm");
+		String statYm = (String) map.get("statYm");
+		String statYmd = (String) map.get("statYmd");
+		Integer nodeId = (Integer) map.get("nodeId");
+		Integer usrCode = (Integer) map.get("usrCode");
+		String deptName = (String) map.get("deptName");
+		String sqlStartDate = sql.replaceAll(Constant.START_DATE, "'"+startDate+"'");
+		String sqlEndDate = sqlStartDate.replaceAll(Constant.END_DATE, "'"+endDate+"'");
+		String sqlStartYm = sqlEndDate.replaceAll(Constant.START_YM, "'"+startYm+"'");
+		String sqlEndYm = sqlStartYm.replaceAll(Constant.END_YM, "'"+endYm+"'");
+		String sqlStatYm = sqlEndYm.replaceAll(Constant.STAT_YM, "'"+statYm+"'");
+		String sqlStatYmd = sqlStatYm.replaceAll(Constant.STAT_YMD, "'"+statYmd+"'");
+		
+		String sqlUsrCode = sqlStatYmd.replaceAll(Constant.USR_CODE, ""+usrCode+"");
+		String sqlRptId = sqlUsrCode.replaceAll(Constant.RPT_ID, ""+nodeId+"");
+		
+		if(StringUtil.isBlank(deptName)){
+			String sqlReal = sqlRptId.replaceAll(Constant.DEPT_NAME, "''");
+			return	sqlReal;
+		}else{
+			String sqlReal = sqlRptId.replaceAll(Constant.DEPT_NAME, ""+deptName+"");
+			return	sqlReal;
+		}
+	}
+	
+	
+	@SuppressWarnings("deprecation")
+	public int exportExcelHeaders(HSSFSheet sheet,HSSFRow row1,HSSFRow row2,HSSFRow row3,
+			HSSFCellStyle style,String[] coloumnNames,Integer levelNum){
+		List<IdNameEntity> listIdNameEntityOneLevel=new ArrayList<IdNameEntity>();
+		int count=0;
+		for (int i = 0; i < coloumnNames.length; i++) {//一级
+			IdNameEntity idNameEntityOneLevel=new IdNameEntity();
+			String nameOneLevel = coloumnNames[i];
+			
+			String[] nameRowColTwoLevel = nameOneLevel.split(Constant.ONE_LEVEL_SEPARATOR);
+			if(nameRowColTwoLevel.length>1){//二级
+				HSSFCell cell1_1 = row1.createCell((short) (count));
+				cell1_1.setCellType(HSSFCell.CELL_TYPE_STRING);
+				cell1_1.setCellValue(nameRowColTwoLevel[0]);
+				cell1_1.setCellStyle(style);
+				for (int j = 1; j < nameRowColTwoLevel.length; j++) {
+					String nameTwoLevel = nameRowColTwoLevel[j];
+					HSSFCell cell2 = null;
+					if(levelNum==1){
+						cell2 = row1.createCell((short) (count));
+					}else if (levelNum==2) {
+						cell2 = row2.createCell((short) (count));
+					}else if (levelNum==3) {
+						cell2 = row3.createCell((short) (count));
+					}
+					cell2.setCellType(HSSFCell.CELL_TYPE_STRING);
+					cell2.setCellValue(nameTwoLevel);
+					cell2.setCellStyle(style);
+					
+					String[] nameRowColsTreeLevel = nameTwoLevel.split(Constant.TWO_LEVEL_SEPARATOR);
+					if(nameRowColsTreeLevel.length>1){//三级
+						HSSFCell cell2_1 = row2.createCell((short) (count));
+						cell2_1.setCellType(HSSFCell.CELL_TYPE_STRING);
+						cell2_1.setCellValue(nameRowColsTreeLevel[0]);
+						cell2_1.setCellStyle(style);
+						for (int k = 1; k < nameRowColsTreeLevel.length; k++) {
+							IdNameEntity idNameEntityThreeLevel=new IdNameEntity();
+							String nameThreeLevel = nameRowColsTreeLevel[k];
+							idNameEntityThreeLevel.setName(nameThreeLevel);
+							HSSFCell cell3 = null;
+							if(levelNum==1){
+								cell3 = row1.createCell((short) (count));
+							}else if (levelNum==2) {
+								cell3 = row2.createCell((short) (count));
+							}else if (levelNum==3) {
+								cell3 = row3.createCell((short) (count));
+							}
+							cell3.setCellType(HSSFCell.CELL_TYPE_STRING);
+					        cell3.setCellValue(nameThreeLevel);
+					        cell3.setCellStyle(style);
+							count++;
+						}
+						//idNameEntityTwoLevel.setName(nameRowColsTreeLevel[0]);
+					}else{
+						count++;
+					}
+				}
+				//idNameEntityOneLevel.setName(nameRowColTwoLevel[0]);
+			}else{
+				HSSFCell cell1 = null;
+				if(levelNum==1){
+					cell1 = row1.createCell((short) (count));
+				}else if (levelNum==2) {
+					cell1 = row2.createCell((short) (count));
+				}else if (levelNum==3) {
+					cell1 = row3.createCell((short) (count));
+				}
+				cell1.setCellType(HSSFCell.CELL_TYPE_STRING);
+				cell1.setCellValue(nameOneLevel);
+				cell1.setCellStyle(style);
+				count++;
+			}
+			listIdNameEntityOneLevel.add(idNameEntityOneLevel);
+		}
+		
+		for (int i = 0; i < count; i++) {
+			sheet.setColumnWidth((short)i, (short)6000);
+		}
+		return levelNum;
+	}
+
+	@SuppressWarnings("deprecation")
+	public void exportExcelDatas(HSSFSheet sheet,List<Map<String,Object>> list,String[] coloumnFields,Integer crossLineNum){
+		int rowSize=list.size();
+		for (int i = 0; i < rowSize; i++) {
+			HSSFRow row = sheet.createRow(crossLineNum+i);
+			Map<String,Object> map = list.get(i);
+			for (int j = 0; j < map.size(); j++) {
+				String code = coloumnFields[j];//取出字段
+				Object obj = map.get(code); //name =  ;//得到字段对应的值
+				HSSFCell cell0 = row.createCell((short) j);
+		        cell0.setCellType(HSSFCell.CELL_TYPE_STRING);
+		        if(obj!=null){
+		        	 cell0.setCellValue(obj.toString());
+		        }else{
+		        	 cell0.setCellValue(""); 
+		        }
+			}
+		}
+	}
+
+	
+
+	
+
+	
+
+	
+}

@@ -1,0 +1,22 @@
+package com.palline.chart.dao;
+
+import java.util.List;
+import java.util.Map;
+
+import com.palline.chart.entity.ChartManager;
+
+/**
+ * Copyright (C), 2015-8-10, 上海蓬海涞讯数据技术有限公司
+ * @author gmm
+ * @version 1.0
+ * @date 2015-8-10
+ */
+public interface ChartDisplayDao {
+	
+	public List<Map<String,Object>> findChartDisplayList(Map<String ,Object> map,String sql);
+	
+	public ChartManager findChartManagerOne(Map<String ,Object> map);
+	
+	
+	
+}

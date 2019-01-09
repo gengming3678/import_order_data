@@ -1,0 +1,32 @@
+package com.palline.rewardrule.service;
+
+import java.util.List;
+
+import com.palline.rewardrule.entity.SysParam;
+
+/**
+ * Copyright (C), 2015-8-10, 上海蓬海涞讯数据技术有限公司
+ * @author gmm
+ * @version 1.0
+ * @date 2015-8-10
+ */
+public interface SysParamService {
+
+	public List<SysParam> querySysParamListPage(SysParam sysParam,int pageIndex,int pageSize);
+	
+	public List<SysParam> querySysParamList(SysParam sysParam);
+	
+	public List<SysParam> getSysParamListByOverride(SysParam sysParam);
+	
+	public Long getSysParamPageTotal(SysParam sysParam);
+
+	public int updateSysParam(SysParam sysParam);
+	
+	public int deleteSysParamById(Integer id);
+	
+	public int deleteSysParamNodeBySysParamId(Integer sysParamId);
+	
+	public int insertSysParam(SysParam sysParam);
+	
+	
+}

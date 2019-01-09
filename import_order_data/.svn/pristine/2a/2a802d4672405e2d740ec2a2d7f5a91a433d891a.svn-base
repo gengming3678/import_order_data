@@ -1,0 +1,186 @@
+package com.palline.table.controller;
+
+import java.awt.Font;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.hssf.usermodel.HSSFFont;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.hssf.util.HSSFColor;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.palline.common.util.Constant;
+import com.palline.system.entity.IdNameEntity;
+import com.palline.system.entity.User;
+import com.palline.table.entity.QueryCondition;
+import com.palline.table.entity.TableManager;
+import com.palline.table.service.imp.TableDisplayServiceImp;
+
+/**
+ * Copyright (C), 2015-8-10, 上海蓬海涞讯数据技术有限公司
+ * @author gmm
+ * @version 1.0
+ * @date 2015-8-10
+ */
+@Controller
+@RequestMapping("/tableDisplay")
+public class TableDisplayController {	
+	@Resource
+	private TableDisplayServiceImp tableDisplayServiceImp;
+	
+	
+	/**
+	 * 导航
+	 **/
+
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/list.do")
+	public String list(Model model,@RequestParam("nodeId")Integer nodeId,@ModelAttribute QueryCondition queryCondition,
+			HttpServletRequest request) {
+		User user = (User) request.getSession().getAttribute(Constant.CUR_USER_SESSION);
+		try {
+		Map<String,Object> map=tableDisplayServiceImp.findQueryCondition(queryCondition, user, nodeId);
+		//1根据节点查询对应的sql，和表头字段
+		Map<String,Object> fieldsMaps = tableDisplayServiceImp.findDisplayFieldNames(map);
+		List<IdNameEntity> listIdNames = (List<IdNameEntity>) fieldsMaps.get("listIdNames");
+		String[] coloumnFields = (String[]) fieldsMaps.get("coloumnFields");
+		String condition = (String) fieldsMaps.get("queryCondition");
+		model.addAttribute("listColoumnFields", listIdNames);
+		model.addAttribute("coloumnFields", coloumnFields);
+		model.addAttribute("nodeId", nodeId);
+		model.addAttribute("queryCondition", condition);
+		model.addAttribute("startDate", map.get("startDate"));
+		model.addAttribute("endDate", map.get("endDate"));
+		model.addAttribute("startYm", map.get("startYm"));
+		model.addAttribute("endYm", map.get("endYm"));
+		model.addAttribute("statYm", map.get("statYm"));
+		model.addAttribute("statYmd", map.get("statYmd"));
+		} catch (Exception e) {
+			e.printStackTrace();
+			if(user==null){
+				return "login/login";
+			}
+			return "error/errorList";
+		}
+		model.addAttribute(Constant.PAGE_SIZE_STR, Constant.PAGE_SIZE);
+		//request.getSession().setAttribute(Constant.RANDOM_NUM, StringUtil.getRandomNum());
+		return "tableDisplay/tableDisplayList";
+	}
+	
+	
+	@ResponseBody
+	@RequestMapping(value = "/findReportDisplayList.do",produces = "application/json; charset=utf-8")
+	public Object findReportDisplayList(@RequestParam("page") Integer pageIndex,
+			@RequestParam("nodeId")Integer nodeId,
+			@ModelAttribute QueryCondition queryCondition,HttpServletRequest request) {
+		User user = (User) request.getSession().getAttribute(Constant.CUR_USER_SESSION);
+		Map<String,Object> map=tableDisplayServiceImp.findQueryCondition(queryCondition, user, nodeId);
+		TableManager reportManager = tableDisplayServiceImp.findReportDisplayOne(map);
+		boolean ifProcedure = reportManager.isIfProcedure();
+		String sql = reportManager.getSqlContent();
+		if(ifProcedure){//存储where条件
+			sql = tableDisplayServiceImp.parseProcedureWhereCondition(map,sql);
+		}else{////sql where条件
+			sql = tableDisplayServiceImp.parseSqlWhereCondition(map,sql);
+		}
+		List<Map<String,Object>> list = tableDisplayServiceImp.findReportDisplayList(map,sql);
+		String curPageListJson = tableDisplayServiceImp.findReportDisplayListPage(list, pageIndex, Constant.PAGE_SIZE);
+		return curPageListJson;
+	}
+
+	/**
+	 * 导出excel方法
+	 * @param request
+	 * @param response
+	 */
+    @RequestMapping("exportExcel")
+    public void exportExcel(HttpServletRequest request, HttpServletResponse response,
+    		@ModelAttribute QueryCondition queryCondition,@RequestParam("nodeId")Integer nodeId){
+    	// 生成提示信息，
+        response.setContentType("application/vnd.ms-excel");
+        String codedFileName = null;
+        OutputStream fOut = null;
+        try
+        {
+        	String sql = "";
+        	Integer levelNum = null;
+        	String[] coloumnNames=new String[]{};
+        	String[] coloumnFields=new String[]{};
+        	Map<String,Object> map=new HashMap<String, Object>();
+        	if(nodeId!=null){
+	    		 //1查询出节点对应的报表sql语句
+        		User user = (User) request.getSession().getAttribute(Constant.CUR_USER_SESSION);
+        		map=tableDisplayServiceImp.findQueryCondition(queryCondition, user, nodeId);
+	    		Map<String,Object> fieldsMaps = tableDisplayServiceImp.findDisplayFieldNames(map);
+	    		coloumnNames = (String[]) fieldsMaps.get("coloumnNames");
+	    		coloumnFields = (String[]) fieldsMaps.get("coloumnFields");
+	    		sql = (String)fieldsMaps.get("sqlContent");
+	    		levelNum = (Integer) fieldsMaps.get("levelNum");
+	    		String nodeName = (String) fieldsMaps.get("nodeName");
+	            // 进行转码，使其支持中文文件名
+	            codedFileName = java.net.URLEncoder.encode(nodeName, "UTF-8");
+        	}
+            response.setHeader("content-disposition", "attachment;filename=" + codedFileName + ".xls");
+            // 产生工作簿对象
+            HSSFWorkbook workbook = new HSSFWorkbook();
+            HSSFCellStyle  style = workbook.createCellStyle();
+            HSSFFont font = workbook.createFont();
+            font.setFontName("宋体");
+            font.setBoldweight((short) Font.BOLD); //粗体
+            font.setColor(HSSFColor.BLUE.index);    //绿字
+            style.setFont(font);
+            //产生工作表对象
+            HSSFSheet sheet = workbook.createSheet();
+            //表头
+            HSSFRow row1 = sheet.createRow(0);
+            HSSFRow row2 = sheet.createRow(1);
+            HSSFRow row3 = sheet.createRow(2);
+            int crossLineNum = tableDisplayServiceImp.exportExcelHeaders(sheet,row1,row2,row3,style,coloumnNames,levelNum);
+            //数据部分
+    		//根据sql语句查询出数据
+    		List<Map<String,Object>> list = tableDisplayServiceImp.findReportDisplayList(map,sql);
+    		tableDisplayServiceImp.exportExcelDatas(sheet,list,coloumnFields,crossLineNum);
+            fOut = response.getOutputStream();
+            workbook.write(fOut);
+        }
+        catch (UnsupportedEncodingException e1)
+        {
+        	e1.printStackTrace();
+        }
+        catch (Exception e)
+        {
+        	e.printStackTrace();
+        }
+        finally
+        {
+            try
+            {
+                fOut.flush();
+                fOut.close();
+            }
+            catch (IOException e) {
+            	e.printStackTrace();
+            }
+        }
+    }
+
+       
+
+    
+}

@@ -1,0 +1,67 @@
+package com.palline.rewardrule.entity;
+
+public class Dept {
+	
+	private Integer id;
+	private String name;
+	private String code;
+	private String type;
+	private Integer roleId;
+	private Integer paramId;
+	private String paramName;
+	
+	private Double value;
+	
+	public Integer getRoleId() {
+		return roleId;
+	}
+	public void setRoleId(Integer roleId) {
+		this.roleId = roleId;
+	}
+	public Integer getId() {
+		return id;
+	}
+	public void setId(Integer id) {
+		this.id = id;
+	}
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	public String getCode() {
+		return code;
+	}
+	public void setCode(String code) {
+		this.code = code;
+	}
+	public String getType() {
+		return type;
+	}
+	public void setType(String type) {
+		this.type = type;
+	}
+	public Integer getParamId() {
+		return paramId;
+	}
+	public void setParamId(Integer paramId) {
+		this.paramId = paramId;
+	}
+	public Double getValue() {
+		return value;
+	}
+	public void setValue(Double value) {
+		this.value = value;
+	}
+	public String getParamName() {
+		return paramName;
+	}
+	public void setParamName(String paramName) {
+		this.paramName = paramName;
+	}
+	
+	
+	
+
+}

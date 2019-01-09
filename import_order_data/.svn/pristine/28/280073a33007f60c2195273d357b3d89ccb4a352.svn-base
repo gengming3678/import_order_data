@@ -1,0 +1,23 @@
+package com.palline.rewardrule.service;
+
+import java.util.List;
+import java.util.Map;
+
+import com.palline.rewardrule.entity.Holiday;
+
+/**
+ * Copyright (C), 2015-8-10, 上海蓬海涞讯数据技术有限公司
+ * @author gmm
+ * @version 1.0
+ * @date 2015-8-10
+ */
+public interface HolidayService {
+
+	public List<Holiday> findAllHolidayList(Map<String,Object> map);
+
+	public int insertHoliday(Holiday holiday);
+	
+	public int deleteHolidayById(Integer id);
+	
+	
+}

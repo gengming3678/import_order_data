@@ -1,0 +1,106 @@
+package com.palline.table.controller;
+
+import java.util.List;
+
+import javax.annotation.Resource;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.alibaba.fastjson.JSON;
+import com.palline.common.util.Constant;
+import com.palline.common.util.JsonUtil;
+import com.palline.common.util.StringUtil;
+import com.palline.common.util.TipInfo;
+import com.palline.system.service.imp.NodeServiceImp;
+import com.palline.table.entity.TableManager;
+import com.palline.table.service.imp.TableManagerServiceImp;
+
+/**
+ * Copyright (C), 2015-8-10, 上海蓬海涞讯数据技术有限公司
+ * @author gmm
+ * @version 1.0
+ * @date 2015-8-10
+ */
+@Controller
+@RequestMapping("/tableManager")
+public class TableManagerController {	
+	@Resource
+	private TableManagerServiceImp reportServiceImp;
+	@Resource
+	private NodeServiceImp nodeServiceImp;
+	
+	/**
+	 * 报表导航
+	 **/
+
+	@RequestMapping(value = "/list.do")
+	public String list(Model model) {
+		return "tableManager/tableManagerList";
+	}
+	
+	/**
+	 * 报表维护拉取数据
+	 **/
+	@ResponseBody
+	@RequestMapping(value = "/getJsonReports.do")
+	public List<TableManager> getJsonReports(@RequestParam("nodeName") String nodeName) {
+		TableManager report = new TableManager();
+		report.setNodeName(StringUtil.strToUtf8(nodeName));
+		List<TableManager> list = reportServiceImp.findReportList(report);
+		return list;
+	}
+	
+	/**
+	 * 报表新增数据
+	 **/
+	@ResponseBody
+	@RequestMapping(value = "/add.do",method=RequestMethod.POST)
+	public Object add(@RequestParam("json") String json) {
+		TableManager tableManager=JSON.parseObject(json,TableManager.class);
+		int result = reportServiceImp.insertReport(tableManager);
+		if(result>0){
+			return new TipInfo(Constant.SUCCESS,"操作成功!");
+		}else{
+			return new TipInfo(Constant.FAILTURE,"操作失败!");
+		}
+	}
+	
+	/**
+	 * 图形报表修改数据
+	 **/
+	@ResponseBody
+	@RequestMapping(value = "/edit.do",method=RequestMethod.POST)
+	public Object edit(@RequestParam("json") String json) {
+		String jsonNew = JsonUtil.replaceAllOnOff(json);
+		TableManager report=JSON.parseObject(jsonNew,TableManager.class);
+		/*Map<String,Object> map=new HashMap<String,Object>();
+		map.put("nodeId", report.getNodeId());
+		ReportManager reportManager = reportDisplayServiceImp.findReportDisplayOne(map);*/
+		int result = reportServiceImp.updateReport(report);
+		if(result>0){
+			return new TipInfo(Constant.SUCCESS,"操作成功!");
+		}else{
+			return new TipInfo(Constant.FAILTURE,"操作失败!");
+		}
+	}
+	
+	/**
+	 * 报表删除数据
+	 **/
+	@ResponseBody
+	@RequestMapping(value = "/delete.do",method=RequestMethod.POST)
+	public Object delete(@RequestParam("id") Integer id) {
+		int result = reportServiceImp.deleteReportById(id);
+		if(result>0){
+			return new TipInfo(Constant.SUCCESS,"操作成功!");
+		}else{
+			return new TipInfo(Constant.FAILTURE,"操作失败!");
+		}
+	}
+
+}

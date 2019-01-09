@@ -1,0 +1,49 @@
+package com.palline.chart.dao.imp;
+
+import java.util.List;
+
+import org.springframework.stereotype.Repository;
+
+import com.palline.chart.dao.ChartManagerDao;
+import com.palline.chart.entity.ChartManager;
+import com.palline.common.base.CommonBaseDao;
+
+
+@Repository
+public class ChartManagerDaoImp extends CommonBaseDao<ChartManager, Integer> implements ChartManagerDao{
+	private static final String nameSpace = "com.palline.chart.entity.ChartManager.";
+
+	@Override
+	public int updateChartManager(ChartManager chartManager) {
+		// TODO Auto-generated method stub
+		return super.updateObject(nameSpace+"updateChartManager", chartManager);
+	}
+
+
+	@Override
+	public int deleteChartManagerById(Integer id) {
+		// TODO Auto-generated method stub
+		return super.deleteObjectById(nameSpace+"delChartManager", id);
+	}
+
+	@Override
+	public int insertChartManager(ChartManager chartManager) {
+		// TODO Auto-generated method stub
+		return super.saveObject(nameSpace+"saveChartManager", chartManager);
+	}
+
+	@Override
+	public List<ChartManager> findChartManagerList(ChartManager chartManager) {
+		// TODO Auto-generated method stub
+		List<ChartManager> list = super.queryForList(nameSpace+"getChartManagerList",chartManager);
+		return list;
+	}
+
+	@Override
+	public Long getChartManagerPageTotal(ChartManager chartManager) {
+		// TODO Auto-generated method stub
+		Long count = super.getCount(nameSpace+"getChartManagerTotal",chartManager);
+		return count;
+	}
+
+}

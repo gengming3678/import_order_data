@@ -1,0 +1,23 @@
+package com.palline.table.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+/**
+ * Copyright (C), 2015-8-10, 上海蓬海涞讯数据技术有限公司
+ * @author gmm
+ * @version 1.0
+ * @date 2015-8-10
+ */
+@Controller
+@RequestMapping("/tableGuide")
+public class TableGuideController {
+
+
+	@RequestMapping(value = "/list.do")
+	public String list() {
+		return "tableGuide/tableGuideList";
+	}
+	
+	
+}

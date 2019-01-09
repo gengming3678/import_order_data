@@ -1,0 +1,167 @@
+package com.palline.rewardrule.service.imp;
+
+import java.util.List;
+
+import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.palline.rewardrule.dao.imp.RewardRuleDaoImp;
+import com.palline.rewardrule.entity.RewardRule;
+import com.palline.rewardrule.service.RewardRuleService;
+
+@Service
+public class RewardRuleServiceImp implements RewardRuleService{
+
+	@Autowired
+	private RewardRuleDaoImp rewardRuleDaoImp;
+
+	@Override
+	public List<RewardRule> queryRewardRuleListPage(RewardRule rewardRule,int pageIndex, int pageSize) {
+		// TODO Auto-generated method stub
+		return rewardRuleDaoImp.queryRewardRuleListPage(rewardRule,pageIndex,pageSize);
+	}
+	public List<RewardRule> queryRewardRuleListPageBingLiKe(RewardRule rewardRule,int pageIndex, int pageSize){
+		return rewardRuleDaoImp.queryRewardRuleListPageBingLiKe(rewardRule,pageIndex,pageSize);
+	}
+	public List<RewardRule> queryRewardRuleHistoryListPage(RewardRule rewardRule){
+		return rewardRuleDaoImp.queryRewardRuleHistoryListPage(rewardRule);
+	}
+	public List<RewardRule> getInitDataRewardRuleList(){
+		return rewardRuleDaoImp.getInitDataRewardRuleList();
+	}
+	
+	
+	@Override
+	public Long getRewardRulePageTotal(RewardRule rewardRule) {
+		// TODO Auto-generated method stub
+		return rewardRuleDaoImp.getRewardRulePageTotal(rewardRule);
+	}
+
+	public Long findIfExsitRewardRuleList(RewardRule rewardRule){
+		return rewardRuleDaoImp.findIfExsitRewardRuleList(rewardRule);
+	}
+
+
+	@Override
+	public int updateRewardRule(RewardRule rewardRule) {
+		// TODO Auto-generated method stub
+		return rewardRuleDaoImp.updateRewardRule(rewardRule);
+	}
+	
+	public int updateRewardRuleHistory(RewardRule rewardRule){
+		return rewardRuleDaoImp.updateRewardRuleHistory(rewardRule);
+	}
+
+	@Override
+	public int deleteRewardRuleById(Integer id) {
+		// TODO Auto-generated method stub
+		return rewardRuleDaoImp.deleteRewardRuleById(id);
+	}
+	
+	public int deleteByDeptIdAndTiDui(RewardRule rewardRule){
+		return rewardRuleDaoImp.deleteByDeptIdAndTiDui(rewardRule);
+	}
+	
+	public int delRewardRuleHistory(Integer id){
+		return rewardRuleDaoImp.delRewardRuleHistory(id);
+	}
+
+	@Override
+	public int insertRewardRule(RewardRule rewardRule) {
+		// TODO Auto-generated method stub
+		return rewardRuleDaoImp.insertRewardRule(rewardRule);
+	}
+	
+	public int insertRewardRuleHistory(RewardRule rewardRule){
+		return rewardRuleDaoImp.insertRewardRuleHistory(rewardRule);
+	}
+
+	public List<RewardRule> queryIdNameEntity(){
+		return rewardRuleDaoImp.queryIdNameEntity();
+	}
+	
+	@SuppressWarnings("deprecation")
+	public void exportExcelHeaders(HSSFSheet sheet,HSSFRow row,HSSFCellStyle style){
+		
+		sheet.setColumnWidth((short)0, (short)6000);
+		sheet.setColumnWidth((short)1, (short)6000);
+		sheet.setColumnWidth((short)2, (short)6000);
+		sheet.setColumnWidth((short)3, (short)6000);
+		sheet.setColumnWidth((short)4, (short)6000);
+		//表头
+        HSSFCell cell0 = row.createCell((short) 0);
+        cell0.setCellType(HSSFCell.CELL_TYPE_STRING);
+        cell0.setCellValue("科室");
+        cell0.setCellStyle(style);
+        
+        HSSFCell cell1 = row.createCell((short) 1);
+        cell1.setCellType(HSSFCell.CELL_TYPE_STRING);
+        cell1.setCellValue("梯队");
+        cell1.setCellStyle(style);
+        
+        HSSFCell cell2 = row.createCell((short) 2);
+        cell2.setCellType(HSSFCell.CELL_TYPE_STRING);
+        cell2.setCellValue("倍数");
+        cell2.setCellStyle(style);
+        
+        HSSFCell cell3 = row.createCell((short) 3);
+        cell3.setCellType(HSSFCell.CELL_TYPE_STRING);
+        cell3.setCellValue("标准");
+        cell3.setCellStyle(style);
+        
+        HSSFCell cell4 = row.createCell((short) 4);
+        cell4.setCellType(HSSFCell.CELL_TYPE_STRING);
+        cell4.setCellValue("更新时间");
+        cell4.setCellStyle(style);
+        
+       
+	}
+	
+	@SuppressWarnings("deprecation")
+	public void exportExcelDatas(HSSFSheet sheet,List<RewardRule> list){
+		int rowSize=list.size();
+		for (int i = 0; i < rowSize; i++) {
+			HSSFRow row = sheet.createRow(i+1);
+			String deptName = list.get(i).getDeptName();
+			String deptType = list.get(i).getDeptType();
+			String tiDuiName = list.get(i).getTiDuiName();
+			Double beiShu = list.get(i).getBeiShu()==null?null:list.get(i).getBeiShu();
+			
+			Double biaoZhun = list.get(i).getBiaoZhun()==null?null:list.get(i).getBiaoZhun();
+			String updateTimeStr = list.get(i).getUpdateTimeStr();
+			/*Double zengFuBiLi = list.get(i).getZengFuBiLi()==null?0.00:list.get(i).getZengFuBiLi();
+			Double zhouMo = list.get(i).getZhouMo()==null?0.00:list.get(i).getZhouMo();
+			Double dianDanJia = list.get(i).getDianDanJia()==null?0.00:list.get(i).getDianDanJia();
+			
+			Double tiQuBiLi = list.get(i).getTiQuBiLi()==null?0.00:list.get(i).getTiQuBiLi();
+			Double jiJiangPoint = list.get(i).getJiJiangPoint()==null?0.00:list.get(i).getJiJiangPoint();*/
+			
+			HSSFCell cell0 = row.createCell((short) 0);
+	        cell0.setCellType(HSSFCell.CELL_TYPE_STRING);
+	        cell0.setCellValue(deptName+"-"+deptType);
+	        
+	        HSSFCell cell1 = row.createCell((short) 1);
+	        cell1.setCellType(HSSFCell.CELL_TYPE_STRING);
+	        cell1.setCellValue(tiDuiName);
+	        
+	        HSSFCell cell2 = row.createCell((short) 2);
+	        cell2.setCellType(HSSFCell.CELL_TYPE_STRING);
+	        cell2.setCellValue(beiShu);
+	        
+	        HSSFCell cell3 = row.createCell((short) 3);
+	        cell3.setCellType(HSSFCell.CELL_TYPE_STRING);
+	        cell3.setCellValue(biaoZhun);
+	        
+	        HSSFCell cell4 = row.createCell((short) 4);
+	        cell4.setCellType(HSSFCell.CELL_TYPE_STRING);
+	        cell4.setCellValue(updateTimeStr);
+	        
+	       
+	        
+		}
+	}
+}

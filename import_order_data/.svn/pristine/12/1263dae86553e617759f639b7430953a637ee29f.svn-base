@@ -1,0 +1,83 @@
+package com.palline.rewardrule.dao.imp;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.stereotype.Repository;
+
+import com.palline.common.base.CommonBaseDao;
+import com.palline.rewardrule.dao.DeptDao;
+import com.palline.rewardrule.entity.Dept;
+import com.palline.system.entity.IdNameEntity;
+
+
+@Repository
+public class DeptDaoImp extends CommonBaseDao<Dept, Integer> implements DeptDao{
+	private static final String nameSpace = "com.palline.rewardrule.entity.Dept.";
+
+
+	@Override
+	public int updateDept(Dept dept) {
+		// TODO Auto-generated method stub
+		return super.updateObject(nameSpace+"updateDept", dept);
+	}
+
+	@Override
+	public int deleteDeptById(Integer id) {
+		// TODO Auto-generated method stub
+		return super.deleteObjectById(nameSpace+"delDept", id);
+	}
+	
+	public int deleteDeptParamByDeptId(Integer id){
+		return super.deleteObjectById(nameSpace+"deleteDeptParamByDeptId", id);
+	}
+
+	@Override
+	public int insertDept(Dept dept) {
+		// TODO Auto-generated method stub
+		return super.saveObject(nameSpace+"saveDept", dept);
+	}
+	
+	public int saveDeptParam(Dept dept){
+		return super.saveObject(nameSpace+"saveDeptParam", dept);
+	}
+
+	@Override
+	public List<Dept> queryDeptListPage(Dept dept,int pageIndex,int pageSize) {
+		// TODO Auto-generated method stub
+		List<Dept> list = super.queryForList(nameSpace+"getDeptList",dept,pageIndex,pageSize);
+		return list;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public int findDeptParamValue(Integer id){
+		Map<String,Integer> map=new HashMap<String,Integer>();
+		map.put("id", id);
+		List<Integer> paramValueList =  super.getSqlSession().selectList(nameSpace+"findDeptParamValue",map);
+		Integer paramValue= null;
+		if(paramValueList.size()>0){
+			paramValue = paramValueList.get(0);
+		}
+		return paramValue;
+	}
+	@SuppressWarnings("unchecked")
+	public List<IdNameEntity> findAllDeptList(Dept dept){
+		List<IdNameEntity> list = super.getSqlSession().selectList(nameSpace+"findAllDeptList",dept);
+		return list;
+	}
+
+	@Override
+	public Long getDeptPageTotal(Dept dept) {
+		// TODO Auto-generated method stub
+		Long count = super.getCount(nameSpace+"getDeptTotal",dept);
+		return count;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public List<Integer> getSelectParamsByDeptId(Dept dept){
+		List<Integer> list = super.getSqlSession().selectList(nameSpace+"getSelectParamsByDeptId",dept);
+		return list;
+	}
+
+}

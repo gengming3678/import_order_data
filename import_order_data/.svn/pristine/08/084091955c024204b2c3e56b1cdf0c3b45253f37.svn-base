@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.palline.rewardrule.entity.RewardRule">
+
+	<resultMap type="rewardRuleEntity" id="rewardRuleMap">
+		<id column="id" property="id" />
+		<result column="beiShu" property="beiShu" />
+		<result column="zengFuBiLi" property="zengFuBiLi" />
+		<result column="tiQuBiLi" property="tiQuBiLi" />
+		<result column="jiJiangPoint" property="jiJiangPoint" />
+		<result column="zhouMo" property="zhouMo" />
+		<result column="dianDanJia" property="dianDanJia" />
+		<result column="deptId" property="deptId" />
+		<result column="deptName" property="deptName" />
+		<result column="deptType" property="deptType" />
+		<result column="tiDuiTypeId" property="tiDuiTypeId" />
+		<result column="tiDuiName" property="tiDuiName" />
+		<result column="biaoZhun" property="biaoZhun" />
+		<result column="updateTimeStr" property="updateTimeStr" />
+	</resultMap>
+	
+	
+	<resultMap type="idNameEntity" id="idNameMap">
+		<id column="id" property="id" />
+		<result column="code" property="code" />
+		<result column="name" property="name" />
+	</resultMap>
+
+	
+	<sql id="getRewardRuleWhere">
+		<where>
+		    <if test="deptId!=null  and deptId!='' ">
+			 	deptId = #{deptId} 
+			</if>  
+			<if test="tiDuiTypeId!=null  and tiDuiTypeId!='' ">
+			   and tiDuiTypeId = #{tiDuiTypeId}
+			</if>   
+			
+			<if test="deptName!=null  and deptName!='' ">
+			   and d.name like #{deptName} +'%'
+			</if>   
+			 <!--  and d.name !='病理科' -->
+		</where>
+	</sql>
+	
+	
+	<sql id="getRewardRuleBingLiKeWhere">
+		<where>
+		    <if test="deptId!=null  and deptId!='' ">
+			 	deptId = #{deptId} 
+			</if>  
+			<if test="tiDuiTypeId!=null  and tiDuiTypeId!='' ">
+			   and tiDuiTypeId = #{tiDuiTypeId}
+			</if>   
+			
+			<if test="deptName!=null  and deptName!='' ">
+			   and d.name like #{deptName} +'%'
+			</if>   
+		</where>
+	</sql>
+	
+	
+	<sql id="getRewardRuleHistoryWhere">
+		<where>
+		    <if test="deptId!=null  and deptId!='' ">
+			 	deptId = #{deptId} 
+			</if>  
+			<if test="tiDuiTypeId!=null  and tiDuiTypeId!='' ">
+			   and tiDuiTypeId = #{tiDuiTypeId}
+			</if>   
+			
+			<if test="deptName!=null  and deptName!='' ">
+			   and d.name = #{deptName} 
+			</if>   
+			
+		</where>
+	</sql>
+	
+	
+	
+	
+	<select id="getRewardRuleTotal" resultType="Long" parameterType="rewardRuleEntity">
+		select count(0) from pl_dept d 
+		LEFT JOIN pl_reward_rule c on c.deptId=d.id 
+		<include refid="getRewardRuleWhere"/> 
+	</select>
+	
+	<select id="getRewardRuleList" resultMap="rewardRuleMap" parameterType="rewardRuleEntity">
+		select c.id,c.beiShu,c.zengFuBiLi,c.biaoZhun,d.id deptId,d.name deptName,d.type deptType,
+		c.tiDuiTypeId tiDuiTypeId,c.tiDuiName,
+		CONVERT(varchar(100),c.updateTime, 120) updateTimeStr
+		from pl_dept d 
+		LEFT JOIN pl_reward_rule c on c.deptId=d.id 
+		<include refid="getRewardRuleWhere"/> 
+		order by d.type,d.name ,c.tiDuiTypeId
+	</select>
+	
+	
+	<select id="queryRewardRuleListPageBingLiKe" resultMap="rewardRuleMap" parameterType="rewardRuleEntity">
+		select c.id,c.beiShu,c.zengFuBiLi,c.zhouMo,c.dianDanJia,d.name deptName,d.type deptType,
+		c.tiDuiTypeId tiDuiTypeId,c.tiDuiName,d.id deptId,c.jiJiangPoint,c.tiQuBiLi,c.biaoZhun,
+		CONVERT(varchar(100),c.updateTime, 120) updateTimeStr
+		from pl_dept d 
+		LEFT JOIN pl_reward_rule c on c.deptId=d.id 
+		<include refid="getRewardRuleBingLiKeWhere"/> 
+		order by d.type,d.name ,c.tiDuiTypeId
+	</select>
+	
+	<select id="getInitDataRewardRuleList" resultMap="rewardRuleMap" parameterType="rewardRuleEntity">
+		select c.id,c.beiShu,c.zengFuBiLi,c.biaoZhun,d.id deptId,d.name deptName,d.type deptType,
+		c.tiDuiTypeId tiDuiTypeId,c.tiDuiName,
+		CONVERT(varchar(100),c.updateTime, 120) updateTimeStr
+		from pl_dept d 
+		LEFT JOIN pl_reward_rule c on c.deptId=d.id 
+		
+	</select>
+	
+	<select id="getRewardRuleHistoryList" resultMap="rewardRuleMap" parameterType="rewardRuleEntity">
+		select c.id,c.beiShu,c.zengFuBiLi,c.biaoZhun,d.name deptName,d.type deptType,
+		c.tiDuiTypeId tiDuiTypeId,c.tiDuiName,d.id deptId,
+		CONVERT(varchar(100),c.updateTime, 120) updateTimeStr
+		from pl_dept d 
+		LEFT JOIN pl_reward_rule_history c on c.deptId=d.id 
+		<include refid="getRewardRuleHistoryWhere"/> 
+		order by d.name ,c.tiDuiTypeId, c.updateTime desc
+	</select>
+	
+	
+	<select id="findIfExsitRewardRuleList" resultType="Long" parameterType="rewardRuleEntity">
+		select count(0) from pl_reward_rule 
+	</select>
+	
+	<insert id="saveRewardRule" parameterType="rewardRuleEntity" useGeneratedKeys="true" keyProperty="id">
+	 	insert into pl_reward_rule (beiShu,zengFuBiLi,biaoZhun,deptId,tiDuiTypeId,tiDuiName,updateTime) 
+	 	VALUES (#{beiShu},#{zengFuBiLi},#{biaoZhun},#{deptId},#{tiDuiTypeId},#{tiDuiName},#{updateTime})
+	</insert>
+	
+	<insert id="batchInsertRewardRule"  parameterType="java.util.List">
+	  insert into pl_reward_rule (beiShu,zengFuBiLi,zhouMo,dianDanJia,deptId,tiDuiTypeId,
+	  updateTime,jiJiangPoint,tiQuBiLi,biaoZhun,tiDuiName) 
+	 	VALUES 
+	   <foreach collection="list"  item="item"  separator=",">
+	    	(#{item.beiShu},#{item.zengFuBiLi},#{item.zhouMo},#{item.dianDanJia},#{item.deptId},
+	    	#{item.tiDuiTypeId},#{item.updateTime},#{item.jiJiangPoint},#{item.tiQuBiLi},
+	    	#{item.biaoZhun},#{item.tiDuiName})
+	   </foreach>
+	  
+	</insert> 
+	
+	<insert id="saveRewardRuleHistory" parameterType="rewardRuleEntity" >
+	 	insert into pl_reward_rule_history (id,beiShu,zengFuBiLi,biaoZhun,deptId,tiDuiTypeId,tiDuiName,updateTime) 
+	 	VALUES (#{id},#{beiShu},#{zengFuBiLi},#{biaoZhun},#{deptId},#{tiDuiTypeId},#{tiDuiName},#{updateTime})
+	</insert>
+	
+	<update id="updateRewardRule" parameterType="rewardRuleEntity">
+	   update pl_reward_rule 
+	   set beiShu=#{beiShu} ,zengFuBiLi=#{zengFuBiLi},biaoZhun=#{biaoZhun},
+	   tiDuiTypeId=#{tiDuiTypeId},tiDuiName=#{tiDuiName},
+	   updateTime=#{updateTime} 
+	   where id=#{id}
+	</update>
+	
+	<update id="updateRewardRuleHistory" parameterType="rewardRuleEntity">
+	   update pl_reward_rule_history 
+	   set beiShu=#{beiShu} ,zengFuBiLi=#{zengFuBiLi}, biaoZhun=#{biaoZhun},
+		   	tiDuiTypeId=#{tiDuiTypeId},tiDuiName=#{tiDuiName},
+		    updateTime=#{updateTime} 
+	   where id=#{id}
+	</update>
+	
+	<delete id="delRewardRule" parameterType="Integer">
+		 delete from pl_reward_rule  where id=#{id}
+	</delete>
+	
+	<delete id="delRewardRuleHistory" parameterType="Integer">
+		 delete from pl_reward_rule_history  where id=#{id}
+	</delete>
+	
+	
+	<delete id="delByDeptIdAndTiDui" parameterType="rewardRuleEntity">
+		 delete from pl_reward_rule  where tiDuiTypeId=#{tiDuiTypeId} and deptId=#{deptId}
+	</delete>
+	
+	<select id="getRewardRuleTypeList" resultMap="rewardRuleMap" >
+		select id tiDuiTypeId,name tiDuiName from pl_name_code
+		order by type
+	</select>
+	
+
+</mapper> 

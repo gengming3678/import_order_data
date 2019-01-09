@@ -1,0 +1,22 @@
+package com.palline.table.dao;
+
+import java.util.List;
+import java.util.Map;
+
+import com.palline.table.entity.TableManager;
+
+/**
+ * Copyright (C), 2015-8-10, 上海蓬海涞讯数据技术有限公司
+ * @author gmm
+ * @version 1.0
+ * @date 2015-8-10
+ */
+public interface TableDisplayDao {
+	
+	public List<Map<String,Object>> findReportDisplayList(Map<String ,Object> map,String sql);
+	
+	public TableManager findReportDisplayOne(Map<String ,Object> map);
+	
+	
+	
+}

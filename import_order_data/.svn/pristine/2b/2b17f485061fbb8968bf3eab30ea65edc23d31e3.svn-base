@@ -1,0 +1,26 @@
+package com.palline.rewardrule.service;
+
+import java.util.List;
+
+import com.palline.rewardrule.entity.CardinalNum;
+
+/**
+ * Copyright (C), 2015-8-10, 上海蓬海涞讯数据技术有限公司
+ * @author gmm
+ * @version 1.0
+ * @date 2015-8-10
+ */
+public interface CardinalNumService {
+
+	public List<CardinalNum> queryCardinalNumListPage(CardinalNum cardinalNum,int pageIndex,int pageSize);
+	
+	public Long getCardinalNumPageTotal(CardinalNum cardinalNum);
+
+	public int updateCardinalNum(CardinalNum cardinalNum);
+	
+	public int deleteCardinalNumById(Integer id);
+	
+	public int insertCardinalNum(CardinalNum cardinalNum);
+	
+	
+}

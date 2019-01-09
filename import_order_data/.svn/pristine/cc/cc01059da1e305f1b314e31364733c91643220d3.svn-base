@@ -1,0 +1,38 @@
+package com.palline.rewardrule.dao;
+
+import java.util.List;
+
+import com.palline.rewardrule.entity.Dept;
+import com.palline.system.entity.IdNameEntity;
+
+/**
+ * Copyright (C), 2015-8-10, 上海蓬海涞讯数据技术有限公司
+ * @author gmm
+ * @version 1.0
+ * @date 2015-8-10
+ */
+public interface DeptDao {
+
+
+	public List<Dept> queryDeptListPage(Dept dept,int pageIndex,int pageSize);
+	
+	public List<IdNameEntity> findAllDeptList(Dept dept);
+	
+	public Long getDeptPageTotal(Dept dept);
+	
+	public int updateDept(Dept dept);
+	
+	public int deleteDeptById(Integer id);
+	
+	public int deleteDeptParamByDeptId(Integer id);
+	
+	public int insertDept(Dept dept);
+	
+	public int saveDeptParam(Dept dept);
+	
+	public int findDeptParamValue(Integer id);
+	
+	public List<Integer> getSelectParamsByDeptId(Dept dept);
+	
+	
+}

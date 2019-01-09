@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.palline.system.entity.Node">
+
+	<resultMap type="nodeEntity" id="nodeMap">
+		<id column="id" property="id" />
+		<result column="parentId" property="parentId" />
+		<result column="text" property="text" />
+		<result column="leaf" property="leaf" />
+		<result column="url" property="url" />
+		<result column="type" property="type" />
+		<result column="imgType" property="imgType" />
+		<result column="roleId" property="roleId" />
+		<result column="xuHao" property="xuHao" />
+		<result column="nodeIds" property="nodeIds" />
+	</resultMap>
+	
+	
+	<resultMap type="nodeCheckEntity" id="nodeCheckMap">
+		<id column="id" property="id" />
+		<result column="parentId" property="parentId" />
+		<result column="text" property="text" />
+		<result column="leaf" property="leaf" />
+		<result column="url" property="url" />
+		<result column="type" property="type" />
+		<result column="imgType" property="imgType" />
+		<result column="roleId" property="roleId" />
+		<result column="checked" property="checked" />
+		<result column="xuHao" property="xuHao" />
+	</resultMap>
+
+	<select id="getNodeListByParentId" resultMap="nodeMap" parameterType="nodeEntity">
+		select   * from   pl_node
+		where 1=1
+		<if test="parentId !=null">
+		   and parentId = #{parentId} 
+		</if> 
+		
+	
+		
+		<if test="nodeIds !=null">
+		  and id in 
+		  <foreach item="item" index="index" collection="nodeIds" open="(" separator="," close=")">  
+			  #{item}  
+		  </foreach>
+		</if> 
+		 order by xuHao  
+	</select>
+	
+	
+	<select id="getNodesByRoleId" resultType="Integer" parameterType="list" >
+		select   rn.nodeId    from   pl_role_node rn
+		where  1=1
+		
+		and rn.roleId in  
+        <foreach item="item" collection="list" separator="," open="(" close=")" index="">  
+	      #{item, jdbcType=NUMERIC}  
+	    </foreach>    
+       
+	</select>
+	
+	<select id="getNodeByRoleIdNodeId" resultMap="nodeCheckMap" parameterType="nodeCheckEntity">
+		select   rn.roleId roleId,rn.nodeId id   from   pl_role_node rn
+		where  1=1
+		<if test="roleId !=null">
+		   and rn.roleId = #{roleId} 
+		</if> 
+		<if test="id !=null">
+		  and  rn.nodeId = #{id} 
+		</if>
+	</select>
+	
+	<update id="updateNodeById"  parameterType="nodeEntity">
+	   update pl_node  
+	   set 
+            text = #{text},
+            url = #{url},
+            leaf = #{leaf},
+            imgType = #{imgType},
+            xuHao = #{xuHao},
+            type=#{type}
+	 	where id = #{id}
+	</update>
+	
+	
+	<insert id="insertNode"  parameterType="nodeEntity">
+	   insert into pl_node  (text,url,leaf,parentId,imgType,xuHao,type) 
+	   values(#{text},#{url},#{leaf},#{parentId},#{imgType},#{xuHao},#{type})
+	</insert>
+	
+	<!-- 批量插入角色菜单权限 -->
+	<insert id="insertRoleNode"  parameterType="java.util.List" >
+	   insert into pl_role_node  (roleId,nodeId) values 
+	    <foreach collection="list" item="item" index="index" separator="," >  
+	        (#{item.roleId},#{item.nodeId})
+    	</foreach>  
+	</insert> 
+	
+	<delete id="deleteNode"  parameterType="nodeEntity">
+	     delete from pl_node where id =#{id}
+	</delete>
+	
+	<sql id="selectIdByParam" >
+	   select * from pl_table t where t.id=9090
+	</sql>
+	
+</mapper> 

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.palline.rewardrule.entity.CardinalNum">
+
+	<resultMap type="cardinalNumEntity" id="cardinalNumMap">
+		<id column="id" property="id" />
+		<result column="cardinalNum" property="cardinalNum" />
+		<result column="allCardinalNum" property="allCardinalNum" />
+		<result column="ifformal" property="ifformal" />
+		<result column="deptId" property="deptId" />
+		<result column="deptName" property="deptName" />
+		<result column="deptType" property="deptType" />
+		<result column="updateTimeStr" property="updateTimeStr" />
+		<result column="updateTime" property="updateTime" />
+	</resultMap>
+
+	
+	<sql id="getCardinalNumWhere">
+		<where>
+		    
+			<if test="deptName!=null  and deptName!='' ">
+			    d.name like #{deptName} +'%'
+			</if>   
+			
+		</where>
+	</sql>
+
+	<select id="getCardinalNumTotal" resultType="Long" parameterType="cardinalNumEntity">
+		select count(0)
+		from pl_dept d
+		 LEFT JOIN pl_cardinal_num c on c.deptId=d.id
+		<include refid="getCardinalNumWhere"/> 
+	</select>
+	
+	<select id="getCardinalNumList" resultMap="cardinalNumMap" parameterType="cardinalNumEntity">
+		select c.id,c.cardinalNum,c.allCardinalNum,d.id deptId,d.name deptName,d.type deptType,
+		c.ifformal,CONVERT(varchar(100), c.updateTime , 120) updateTimeStr
+		from pl_dept d LEFT JOIN pl_cardinal_num c on c.deptId=d.id
+		<include refid="getCardinalNumWhere"/> 
+		order by d.type,d.name,c.updateTime desc
+	</select>
+	
+	<insert id="saveCardinalNum" parameterType="cardinalNumEntity">
+	 	insert into pl_cardinal_num (cardinalNum,allCardinalNum,ifformal,deptId,updateTime) 
+	 	VALUES (#{cardinalNum},#{allCardinalNum},#{ifformal},#{deptId},#{updateTime})
+	</insert>
+	
+	<update id="updateCardinalNum" parameterType="cardinalNumEntity">
+	   update pl_cardinal_num set cardinalNum=#{cardinalNum} ,
+	   ifformal=#{ifformal},updateTime=#{updateTime} 
+	   where id=#{id}
+	</update>
+	
+	<delete id="delCardinalNum" parameterType="Integer">
+		delete from pl_cardinal_num where id=#{id}
+	</delete>
+	
+
+</mapper> 

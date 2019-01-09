@@ -1,0 +1,63 @@
+package com.palline.system.dao.imp;
+
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
+
+import com.palline.common.base.CommonBaseDao;
+import com.palline.system.dao.NodeDao;
+import com.palline.system.entity.Node;
+import com.palline.system.entity.NodeCheck;
+
+
+@Repository
+public class NodeDaoImp extends CommonBaseDao<Node, Integer> implements  NodeDao{
+	private static final String nameSpace = "com.palline.system.entity.Node.";
+
+	@Autowired
+	private JdbcTemplate jdbcTemplate;
+	
+	@Override
+	public List<Node> queryNodeListByParentId(Node node) {
+		List<Node> list = super.queryForList(nameSpace+"getNodeListByParentId",node);
+		return list;
+	}
+	
+	@Override
+	public NodeCheck queryNodeListByRoleIdNodeId(Node node) {
+		NodeCheck node1 = (NodeCheck) super.getSqlSession().selectOne(nameSpace+"getNodeByRoleIdNodeId",node);
+		return node1;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public List<Integer> queryNodeListByRoleId(List<Integer> roleIds){
+		return super.getSqlSession().selectList(nameSpace+"getNodesByRoleId",roleIds);
+	}
+	
+	public int updateNode(Node node){
+		return super.updateObject(nameSpace+"updateNodeById", node);
+	}
+
+	@Override
+	public int insertNode(Node node) {
+		return super.saveObject(nameSpace+"insertNode", node);
+	}
+
+	public int updateNodeReportIdById(Node node){
+		return super.updateObject(nameSpace+"updateNodeReportIdById", node);
+	}
+	public int insertRoleNode(List<Map<String,Integer>> list){
+		return super.getSqlSession().insert(nameSpace+"insertRoleNode", list);
+	}
+	public int deleteNode(Node node){
+		return super.deleteObjectByObj(nameSpace+"deleteNode", node);
+	}
+	public void updateNodeReportId(Integer nodeId,Integer reportId){
+		jdbcTemplate.update(" update pl_node   set reportId= ? where id = ? ", new Object[]{reportId,nodeId});
+	}
+	
+
+}

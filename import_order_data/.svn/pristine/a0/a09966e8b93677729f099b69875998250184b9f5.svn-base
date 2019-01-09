@@ -1,0 +1,48 @@
+package com.palline.table.dao.imp;
+
+import java.util.List;
+
+import org.springframework.stereotype.Repository;
+
+import com.palline.common.base.CommonBaseDao;
+import com.palline.table.dao.TableManagerDao;
+import com.palline.table.entity.TableManager;
+
+
+@Repository
+public class TableManagerDaoImp extends CommonBaseDao<TableManager, Integer> implements TableManagerDao{
+	private static final String nameSpace = "com.palline.table.entity.TableManager.";
+
+
+	public int updateReport(TableManager report) {
+		// TODO Auto-generated method stub
+		return super.updateObject(nameSpace+"updateReport", report);
+	}
+
+	
+	public int deleteReportById(Integer id) {
+		// TODO Auto-generated method stub
+		return super.deleteObjectById(nameSpace+"delReport", id);
+	}
+
+	
+	public int insertReport(TableManager report) {
+		// TODO Auto-generated method stub
+		return super.saveObject(nameSpace+"saveReport", report);
+	}
+
+	
+	public List<TableManager> findReportList(TableManager report) {
+		// TODO Auto-generated method stub
+		List<TableManager> list = super.queryForList(nameSpace+"getReportList",report);
+		return list;
+	}
+
+	
+	public Long getReportPageTotal(TableManager report) {
+		// TODO Auto-generated method stub
+		Long count = super.getCount(nameSpace+"getReportTotal",report);
+		return count;
+	}
+
+}

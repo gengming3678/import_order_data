@@ -1,0 +1,92 @@
+package com.palline.rewardrule.dao.imp;
+
+import java.util.List;
+
+import org.springframework.stereotype.Repository;
+
+import com.palline.common.base.CommonBaseDao;
+import com.palline.rewardrule.dao.RewardRuleDao;
+import com.palline.rewardrule.entity.RewardRule;
+
+
+@Repository
+public class RewardRuleDaoImp extends CommonBaseDao<RewardRule, Integer> implements RewardRuleDao{
+	private static final String nameSpace = "com.palline.rewardrule.entity.RewardRule.";
+
+
+	@Override
+	public int updateRewardRule(RewardRule rewardRule) {
+		// TODO Auto-generated method stub
+		return super.updateObject(nameSpace+"updateRewardRule", rewardRule);
+	}
+	
+	public int updateRewardRuleHistory(RewardRule rewardRule){
+		return super.updateObject(nameSpace+"updateRewardRuleHistory", rewardRule);
+	}
+
+	@Override
+	public int deleteRewardRuleById(Integer id) {
+		// TODO Auto-generated method stub
+		return super.deleteObjectById(nameSpace+"delRewardRule", id);
+	}
+
+	public int deleteByDeptIdAndTiDui(RewardRule rewardRule){
+		return super.deleteObjectByObj(nameSpace+"delByDeptIdAndTiDui", rewardRule);
+	}
+	
+	public int delRewardRuleHistory(Integer id){
+		return super.deleteObjectById(nameSpace+"delRewardRuleHistory", id);
+	}
+	@Override
+	public int insertRewardRule(RewardRule rewardRule) {
+		// TODO Auto-generated method stub
+		return super.saveObject(nameSpace+"saveRewardRule", rewardRule);
+	}
+	
+	@Override
+	public int insertRewardRuleHistory(RewardRule rewardRule){
+		return super.saveObject(nameSpace+"saveRewardRuleHistory", rewardRule);
+	}
+
+	@Override
+	public List<RewardRule> queryRewardRuleListPage(RewardRule rewardRule,int pageIndex, int pageSize) {
+		// TODO Auto-generated method stub
+		List<RewardRule> list = super.queryForList(nameSpace+"getRewardRuleList",rewardRule,pageIndex,pageSize);
+		return list;
+	}
+	
+	public List<RewardRule> queryRewardRuleListPageBingLiKe(RewardRule rewardRule,int pageIndex, int pageSize){
+		List<RewardRule> list = super.queryForList(nameSpace+"queryRewardRuleListPageBingLiKe",rewardRule,pageIndex,pageSize);
+		return list;
+	}
+	@Override
+	public List<RewardRule> queryRewardRuleHistoryListPage(RewardRule rewardRule){
+		List<RewardRule> list = super.queryForList(nameSpace+"getRewardRuleHistoryList",rewardRule);
+		return list;
+	}
+	
+	public List<RewardRule> getInitDataRewardRuleList(){
+		List<RewardRule> list = super.queryForList(nameSpace+"getInitDataRewardRuleList");
+		return list;
+	}
+	
+	public Long findIfExsitRewardRuleList(RewardRule rewardRule){
+		Long count = super.getCount(nameSpace+"findIfExsitRewardRuleList",rewardRule);
+		return count;
+	}
+
+	@Override
+	public Long getRewardRulePageTotal(RewardRule rewardRule) {
+		// TODO Auto-generated method stub
+		Long count = super.getCount(nameSpace+"getRewardRuleTotal",rewardRule);
+		return count;
+	}
+	public List<RewardRule> queryIdNameEntity(){
+		@SuppressWarnings("unchecked")
+		List<RewardRule> list = super.getSqlSession().selectList(nameSpace+"getRewardRuleTypeList");
+		return list;
+	}
+
+	
+
+}

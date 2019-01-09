@@ -1,0 +1,142 @@
+package com.palline.rewardrule.controller;
+
+import java.util.Date;
+import java.util.List;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.alibaba.fastjson.JSON;
+import com.palline.common.util.Constant;
+import com.palline.common.util.JsonUtil;
+import com.palline.common.util.PageData;
+import com.palline.common.util.StringUtil;
+import com.palline.common.util.TipInfo;
+import com.palline.rewardrule.entity.CardinalNum;
+import com.palline.rewardrule.service.imp.CardinalNumServiceImp;
+
+/**
+ * Copyright (C), 2015-8-10, 上海蓬海涞讯数据技术有限公司
+ * @author gmm
+ * @version 1.0
+ * @date 2015-8-10
+ */
+@Controller
+@RequestMapping("/cardinalNum")
+public class CardinalNumController {	
+	@Resource
+	private CardinalNumServiceImp CardinalNumServiceImp;
+	
+	/**
+	 * 基数导航
+	 **/
+
+	@RequestMapping(value = "/list.do")
+	public String list(Model model) {
+		model.addAttribute(Constant.PAGE_SIZE_STR, Constant.PAGE_SIZE);
+		model.addAttribute("startDate", StringUtil.getCurMonth());
+		model.addAttribute("endDate", StringUtil.getCurMonth());
+		return "cardinalNum/cardinalNumList";
+	}
+	
+	/**
+	 * 基数维护拉取数据
+	 **/
+	@ResponseBody
+	@RequestMapping(value = "/getJsonCardinalNums.do")
+	public PageData<CardinalNum> getJsonCardinalNums(HttpServletResponse response, HttpServletRequest request,
+			@RequestParam("page") Integer pageIndex,@RequestParam("findName") String findName) {
+		CardinalNum cardinalNum = new CardinalNum();
+		cardinalNum.setDeptName(StringUtil.strToUtf8(findName));
+		Long total = CardinalNumServiceImp.getCardinalNumPageTotal(cardinalNum);
+		List<CardinalNum> list = CardinalNumServiceImp.queryCardinalNumListPage(cardinalNum,pageIndex,Constant.PAGE_SIZE);
+		return new PageData<CardinalNum>(total,list);
+	}
+	
+	/**
+	 * 基数新增数据
+	 **/
+	@ResponseBody
+	@RequestMapping(value = "/add.do",method=RequestMethod.POST)
+	public Object add(@RequestParam("json") String json,@RequestParam("operType") Integer operType) {
+		String jsonNew = JsonUtil.replaceAllOnOff(json);
+		CardinalNum cardinalNum=JSON.parseObject(jsonNew,CardinalNum.class);
+		Double yunSuanShuZi=0d;
+		if(cardinalNum.getYuanSuanNum()!=null){
+			yunSuanShuZi=cardinalNum.getYuanSuanNum();
+		}
+		if(operType==1){//加法
+			Double sNum = cardinalNum.getCardinalNum()+yunSuanShuZi;
+			cardinalNum.setCardinalNum(sNum);
+		}else if(operType==2){//减法
+			Double sNum = cardinalNum.getCardinalNum()-yunSuanShuZi;
+			cardinalNum.setCardinalNum(sNum);
+		}else if(operType==3){//乘法
+			Double sNum = cardinalNum.getCardinalNum()*yunSuanShuZi;
+			cardinalNum.setCardinalNum(sNum);
+		}else if(operType==4){//提取比列
+			Double sNum = cardinalNum.getAllCardinalNum()*yunSuanShuZi;
+			cardinalNum.setCardinalNum(sNum);
+		}
+		cardinalNum.setUpdateTime(new Date());
+		int result = CardinalNumServiceImp.insertCardinalNum(cardinalNum);
+		if(result>0){
+			return new TipInfo(Constant.SUCCESS,"操作成功!");
+		}else{
+			return new TipInfo(Constant.FAILTURE,"操作失败!");
+		}
+	}
+	
+	/**
+	 * 基数修改数据
+	 **/
+	@ResponseBody
+	@RequestMapping(value = "/edit.do",method=RequestMethod.POST)
+	public Object edit(@RequestParam("json") String json,@RequestParam("operType") Integer operType) {
+		String jsonNew = JsonUtil.replaceAllOnOff(json);
+		CardinalNum cardinalNum=JSON.parseObject(jsonNew,CardinalNum.class);
+		if(operType==1){//加法
+			Double sNum = cardinalNum.getCardinalNum()+cardinalNum.getYuanSuanNum();
+			cardinalNum.setCardinalNum(sNum);
+		}else if(operType==2){//减法
+			Double sNum = cardinalNum.getCardinalNum()-cardinalNum.getYuanSuanNum();
+			cardinalNum.setCardinalNum(sNum);
+		}else if(operType==3){//乘法
+			Double sNum = cardinalNum.getCardinalNum()*cardinalNum.getYuanSuanNum();
+			cardinalNum.setCardinalNum(sNum);
+		}else if(operType==4){//提取比列
+			Double sNum = cardinalNum.getAllCardinalNum()*cardinalNum.getYuanSuanNum();
+			cardinalNum.setCardinalNum(sNum);
+		}
+		cardinalNum.setUpdateTime(new Date());
+		int result = CardinalNumServiceImp.updateCardinalNum(cardinalNum);
+		if(result>0){
+			return new TipInfo(Constant.SUCCESS,"操作成功!");
+		}else{
+			return new TipInfo(Constant.FAILTURE,"操作失败!");
+		}
+	}
+	
+	/**
+	 * 基数删除数据
+	 **/
+	@ResponseBody
+	@RequestMapping(value = "/delete.do",method=RequestMethod.POST)
+	public Object delete(@RequestParam("id") Integer id) {
+		int result = CardinalNumServiceImp.deleteCardinalNumById(id);
+		if(result>0){
+			return new TipInfo(Constant.SUCCESS,"操作成功!");
+		}else{
+			return new TipInfo(Constant.FAILTURE,"操作失败!");
+		}
+	}
+
+}

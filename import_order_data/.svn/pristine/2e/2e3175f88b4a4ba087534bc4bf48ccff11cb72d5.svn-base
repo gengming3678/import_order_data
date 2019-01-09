@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.palline.system.entity.User">
+
+	<resultMap type="userEntity" id="userMap">
+		<id column="id" property="id" />
+		<result column="name" property="name" />
+		<result column="realName" property="realName" />
+		<result column="password" property="password" />
+		<result column="roleId" property="roleId" />
+		<result column="roleName" property="roleName" />
+		<result column="deptId" property="deptId" />
+		<result column="deptName" property="deptName" />
+	</resultMap>
+	
+	<resultMap type="keyValueCheckEntity" id="keyValueCheckMap">
+		<id column="id" property="id" />
+		<result column="value" property="value" />
+		<result column="userId" property="userId" />
+	</resultMap>
+
+
+	<select id="getUserSelectRolesByUserId" resultType="Integer"  parameterType="keyValueCheckEntity">
+		  select r.id id
+		  from pl_user_role ur  ,  pl_role r 
+		  where ur.roleId=r.id
+		 <if test="id!=null and  id!=null">
+		    and  ur.userId=#{id}
+		</if>  
+	</select>
+	
+	<!-- 登陆用 -->
+	<select id="getUserByNameAndPass" resultMap="userMap" parameterType="userEntity">
+		select * from pl_user
+		 <if test="name!=null and  password!=null">
+		  where name = #{name} and password=#{password}
+		</if>  
+	</select>
+	
+	
+	<sql id="getUserWhere">
+		where  1=1
+		    <if test="name!=null  and name!='' ">
+			 	and  name like '%'+#{name}+'%' 
+			</if>  
+			<if test="realName!=null  and realName!='' ">
+			   or realName like '%'+#{realName}+'%'
+			</if>   
+				
+	</sql>
+	
+	<select id="getUserTotal" resultType="Long" parameterType="userEntity">
+		select count(0) 
+		from pl_user u left join pl_role r  on u.roleId=r.id 
+		<include refid="getUserWhere"/> 
+	</select>
+	
+	<select id="getUserList" resultMap="userMap" parameterType="userEntity">
+		select u.id,u.name ,u.realName, u.password ,
+		r.roleName ,r.id roleId,d.name deptName,d.id deptId 
+		from  pl_user u 
+		left join pl_role r  on u.roleId=r.id 
+		left join pl_dept d  on u.deptId=d.id 
+		<include refid="getUserWhere"/> 
+		 order by id
+	</select>
+	
+	
+	<select id="getRoleIdsByUserId" resultType="Integer" parameterType="userEntity">
+		select  r.roleId	from  pl_user_role r  where r.userId=#{id}
+	</select>
+	
+	<insert id="saveUser" parameterType="userEntity">
+	 	insert into pl_user (name, realName, password,roleId,deptId) 
+	 	 VALUES (#{name},#{realName},#{password},#{roleId},#{deptId})
+	</insert>
+	
+	<insert id="saveUserRole" parameterType="userEntity">
+	 	insert into pl_user_role (roleId, userId) VALUES (#{roleId},#{id})
+	</insert>
+	
+	<update id="updateUser" parameterType="userEntity">
+	   update pl_user 
+	   set 
+	   name=#{name} ,realName=#{realName} , password=#{password} ,roleId=#{roleId} ,deptId=#{deptId} 
+	   where id=#{id}
+	</update>
+	
+	<delete id="delUser" parameterType="Integer">
+		delete from pl_user where id=#{id}
+	</delete>
+	
+	<delete id="deleteRoleUserByUserId" parameterType="Integer">
+		delete from pl_user_role where userId=#{userId}
+	</delete>
+
+</mapper> 

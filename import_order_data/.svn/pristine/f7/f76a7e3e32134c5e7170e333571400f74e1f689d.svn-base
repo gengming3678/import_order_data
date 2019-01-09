@@ -1,0 +1,26 @@
+package com.palline.chart.dao;
+
+import java.util.List;
+
+import com.palline.chart.entity.ChartManager;
+
+/**
+ * Copyright (C), 2015-8-10, 上海蓬海涞讯数据技术有限公司
+ * @author gmm
+ * @version 1.0
+ * @date 2015-8-10
+ */
+public interface ChartManagerDao {
+
+
+	public List<ChartManager> findChartManagerList(ChartManager chartManager);
+	
+	public Long getChartManagerPageTotal(ChartManager chartManager);
+	
+	public int updateChartManager(ChartManager chartManager);
+	
+	public int deleteChartManagerById(Integer id);
+	
+	public int insertChartManager(ChartManager chartManager);
+	
+}

@@ -1,0 +1,83 @@
+package com.palline.table.entity;
+
+public class QueryCondition {
+
+	private String startDate;
+	private String endDate;
+	private String startYm;
+	private String endYm;
+	private String statYm;
+	private String statYmd;
+	private String deptName;
+	private Integer usrCode;
+	private String rptId;
+	
+	private String randomNum;
+	
+	public String getStartDate() {
+		return startDate;
+	}
+	public void setStartDate(String startDate) {
+		this.startDate = startDate;
+	}
+	public String getEndDate() {
+		return endDate;
+	}
+	public void setEndDate(String endDate) {
+		this.endDate = endDate;
+	}
+	public String getStartYm() {
+		return startYm;
+	}
+	public void setStartYm(String startYm) {
+		this.startYm = startYm;
+	}
+	public String getEndYm() {
+		return endYm;
+	}
+	public void setEndYm(String endYm) {
+		this.endYm = endYm;
+	}
+	public String getStatYm() {
+		return statYm;
+	}
+	public void setStatYm(String statYm) {
+		this.statYm = statYm;
+	}
+	public String getStatYmd() {
+		return statYmd;
+	}
+	public void setStatYmd(String statYmd) {
+		this.statYmd = statYmd;
+	}
+	public String getDeptName() {
+		return deptName;
+	}
+	public void setDeptName(String deptName) {
+		this.deptName = deptName;
+	}
+	
+	public String getRptId() {
+		return rptId;
+	}
+	public void setRptId(String rptId) {
+		this.rptId = rptId;
+	}
+	public Integer getUsrCode() {
+		return usrCode;
+	}
+	public void setUsrCode(Integer usrCode) {
+		this.usrCode = usrCode;
+	}
+	public String getRandomNum() {
+		return randomNum;
+	}
+	public void setRandomNum(String randomNum) {
+		this.randomNum = randomNum;
+	}
+	
+	
+	
+	
+	
+}

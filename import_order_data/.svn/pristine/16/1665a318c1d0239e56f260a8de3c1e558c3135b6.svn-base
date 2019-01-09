@@ -1,0 +1,285 @@
+package com.palline.system.controller;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.alibaba.fastjson.JSON;
+import com.palline.common.util.Constant;
+import com.palline.common.util.TipInfo;
+import com.palline.system.entity.Node;
+import com.palline.system.entity.NodeCheck;
+import com.palline.system.entity.User;
+import com.palline.system.service.imp.NodeServiceImp;
+import com.palline.system.service.imp.UserServiceImp;
+
+/**
+ * Copyright (C), 2015-8-10, 上海蓬海涞讯数据技术有限公司
+ * @author gmm
+ * @version 1.0
+ * @date 2015-8-10
+ */
+@Controller
+@RequestMapping("/node")
+public class NodeController {
+	
+	@Resource
+	private NodeServiceImp nodeServiceImp;
+	
+	@Resource
+	private UserServiceImp userServiceImp;
+
+
+	
+	/**  
+	 * 登陆之后导航菜单 >> 获取折叠模块list
+	 * @throws IOException 
+	 **/
+
+	@RequestMapping(value = "/getusernodes.do")
+	public String getUsernodes(HttpServletRequest request,HttpServletResponse response, Model model) throws IOException {
+		//判断是否登录，才能获取菜单
+		User user = (User) request.getSession().getAttribute(Constant.CUR_USER_SESSION);
+        if (user == null){// 注销session
+        	HttpSession session = request.getSession();
+    		session.invalidate();
+        	return "login/login";
+        } 
+		//折叠模块
+		List<Node> list=new ArrayList<Node>();
+		Node nodeEntity=new Node();
+		nodeEntity.setParentId(0);
+		//菜单权限>>查找角色对应的菜单
+		//if(user.getRoleId()!=null){
+			List<Integer> roleIds = userServiceImp.getRoleIdsByUserId(user);
+			List<Integer> nodeIds = nodeServiceImp.queryNodeListByRoleId(roleIds);
+			nodeEntity.setNodeIds(nodeIds);
+			list = nodeServiceImp.queryNodeListByParentId(nodeEntity);
+		//}
+		model.addAttribute("listNodes", list);
+		return "index/indexList";
+	}
+	
+	/**   
+	 *  登陆之后导航菜单 >>  获取每个折叠模块下面的子菜单
+	 * @throws IOException 
+	 * 
+	 **/
+	@ResponseBody
+	@RequestMapping(value = "/getNodesByParentId.do")
+	public List<Node> getNodesByParentId(@RequestParam("parentId") Integer parentId,
+			HttpServletResponse response, HttpServletRequest request,Model model) throws IOException {
+		//模块下的树
+		Node nodeEntity=new Node();
+		nodeEntity.setParentId(parentId);
+		
+		////菜单权限>>查找角色对应的菜单
+		User user = (User) request.getSession().getAttribute(Constant.CUR_USER_SESSION);
+        if (user == null){
+        	response.sendRedirect("../login/logout.do");  
+        } 
+		Node node=new Node();
+		node.setRoleId(user.getRoleId());
+		//if(user.getRoleId()!=null){
+			List<Integer> roleIds = userServiceImp.getRoleIdsByUserId(user);
+			List<Integer> nodeIds = nodeServiceImp.queryNodeListByRoleId(roleIds);
+			nodeEntity.setNodeIds(nodeIds);
+		//}
+		List<Node> list = nodeServiceImp.queryNodeListByParentId(nodeEntity);
+		return list;
+	}
+	
+	
+	/**   
+	 *  登陆之后导航菜单 >>  获取每个折叠模块下面的子菜单
+	 * 
+	 **/
+	@ResponseBody
+	@RequestMapping(value = "/getCheckNodesByParentId.do")
+	public List<NodeCheck> getCheckNodesByParentId(@RequestParam("parentId") Integer parentId,
+			HttpServletResponse response, HttpServletRequest request,Model model) {
+		//模块下的树
+		User user = (User) request.getSession().getAttribute(Constant.CUR_USER_SESSION);
+		Node nodeEntity=new Node();
+		nodeEntity.setParentId(parentId);
+		List<Node> list = nodeServiceImp.queryNodeListByParentId(nodeEntity);
+		List<NodeCheck> listCheck=new ArrayList<NodeCheck>();
+		for (Node node:list) {
+			NodeCheck nodeCheck=new NodeCheck();
+			node.setRoleId(user.getRoleId());
+			NodeCheck nodeNw = nodeServiceImp.queryNodeListByRoleIdNodeId(node);
+			nodeCheck.setText(node.getText());
+			nodeCheck.setUrl(node.getUrl());
+			nodeCheck.setLeaf(node.isLeaf());
+			nodeCheck.setImgType(node.getImgType());
+			nodeCheck.setParentId(node.getParentId());
+			nodeCheck.setId(node.getId());
+			nodeCheck.setRoleId(node.getRoleId());
+			nodeCheck.setChecked(nodeNw!=null?true:false);
+			listCheck.add(nodeCheck);
+		}
+		return listCheck;
+	}
+	
+	
+	
+	/**   
+	 *  登陆之后导航菜单 >>  获取每个折叠模块下面的子菜单
+	 * 
+	 **/
+	@ResponseBody
+	@RequestMapping(value = "/getCheckNodesByPIdAndRoleId.do")
+	public List<NodeCheck> getCheckNodesByPIdAndRoleId(@RequestParam("parentId") Integer parentId,@RequestParam("roleId") Integer roleId,
+			HttpServletResponse response, HttpServletRequest request,Model model) {
+		//模块下的树
+		Node nodeEntity=new Node();
+		nodeEntity.setParentId(parentId);
+		List<Node> list = nodeServiceImp.queryNodeListByParentId(nodeEntity);
+		List<NodeCheck> listCheck=new ArrayList<NodeCheck>();
+		for (Node node:list) {
+			NodeCheck nodeCheck=new NodeCheck();
+			node.setRoleId(roleId);
+			NodeCheck nodeNw = nodeServiceImp.queryNodeListByRoleIdNodeId(node);
+			nodeCheck.setText(node.getText());
+			nodeCheck.setUrl(node.getUrl());
+			nodeCheck.setLeaf(node.isLeaf());
+			nodeCheck.setImgType(node.getImgType());
+			nodeCheck.setParentId(node.getParentId());
+			nodeCheck.setId(node.getId());
+			nodeCheck.setRoleId(node.getRoleId());
+			nodeCheck.setChecked(nodeNw!=null?true:false);
+			nodeCheck.setExpanded(true);
+			listCheck.add(nodeCheck);
+		}
+		return listCheck;
+	}
+	
+	
+	
+	
+	/**   
+	 *  图形报表选择报表下拉框
+	 * 
+	 **/
+	@ResponseBody
+	@RequestMapping(value = "/getCheckNodesByNodeReportId.do")
+	public List<NodeCheck> getCheckNodesByNodeReportId(@RequestParam("parentId") Integer parentId,
+			HttpServletResponse response, HttpServletRequest request,Model model) {
+		//模块下的树
+		Node nodeEntity=new Node();
+		nodeEntity.setParentId(parentId);
+		//nodeEntity.setType(2);
+		List<Node> list = nodeServiceImp.queryNodeListByParentId(nodeEntity);
+		List<NodeCheck> listCheck=new ArrayList<NodeCheck>();
+		for (Node node:list) {
+			//Integer type = node.getType();
+			NodeCheck nodeCheck=new NodeCheck();
+			nodeCheck.setText(node.getText());
+			nodeCheck.setUrl(node.getUrl());
+			nodeCheck.setLeaf(node.isLeaf());
+			nodeCheck.setImgType(node.getImgType());
+			nodeCheck.setParentId(node.getParentId());
+			nodeCheck.setId(node.getId());
+			nodeCheck.setRoleId(node.getRoleId());
+			nodeCheck.setChecked(false);
+			//nodeCheck.setExpanded(true);
+			listCheck.add(nodeCheck);
+		}
+		return listCheck;
+	}
+	
+	/**
+	 * 树节点导航
+	 **/
+
+	@RequestMapping(value = "/list.do")
+	public String list(Model model) {
+		return "node/nodeList";
+	}
+	
+	/**
+	 * 树节点新增数据
+	 **/
+	@ResponseBody
+	@RequestMapping(value = "/add.do",method=RequestMethod.POST)
+	public Object add(@RequestParam("json") String json,@RequestParam("id") Integer id) {
+		Node nodeEntity=JSON.parseObject(json,Node.class);
+		nodeEntity.setParentId(id);
+		Integer type = nodeEntity.getType();
+		if(type==1){
+			nodeEntity.setUrl("/tableDisplay/list.do");
+		}else if(type==2){
+			nodeEntity.setUrl("/chartDisplay/list.do");
+		}
+		int result = nodeServiceImp.insertNode(nodeEntity);
+		if(result>0){
+			return new TipInfo(Constant.SUCCESS,"操作成功!");
+		}else{
+			return new TipInfo(Constant.FAILTURE,"操作失败!");
+		}
+	}
+	
+	/**
+	 * 树节点修改数据
+	 **/
+	@ResponseBody
+	@RequestMapping(value = "/edit.do",method=RequestMethod.POST)
+	public Object edit(@RequestParam("json") String json,@RequestParam("id") Integer id) {
+		Node nodeEntity=JSON.parseObject(json,Node.class);
+		int result = nodeServiceImp.updateNode(nodeEntity);
+		if(result>0){
+			return new TipInfo(Constant.SUCCESS,"操作成功!");
+		}else{
+			return new TipInfo(Constant.FAILTURE,"操作失败!");
+		}
+	}
+	public static void main(String[] args) {
+		String json ="{'name':'zhangsan','id':1042732,'type':'2'}";
+		String str = json.replace("'type':'2'","type:''");
+		System.out.println(str);
+	}
+	
+	/**
+	 * 树节点删除数据
+	 **/
+	@ResponseBody
+	@RequestMapping(value = "/delete.do",method=RequestMethod.POST)
+	public Object delete(@RequestParam("id") Integer id) {
+		Node nodeEntity=new Node();
+		nodeEntity.setId(id);
+		int result = nodeServiceImp.deleteNode(nodeEntity);
+		if(result>0){
+			return new TipInfo(Constant.SUCCESS,"操作成功!");
+		}else{
+			return new TipInfo(Constant.FAILTURE,"操作失败!");
+		}
+	}
+	
+	/**
+	 * 树节点维护拉取数据
+	 **/
+	@ResponseBody
+	@RequestMapping(value = "/getJsonNodesByPId.do")
+	public List<Node> getJsonNodesByPId(@RequestParam("parentId") Integer parentId,
+			HttpServletResponse response, HttpServletRequest request,Model model) {
+		//模块下的树
+		List<Node> list=new ArrayList<Node>();
+		Node nodeEntity=new Node();
+		nodeEntity.setParentId(parentId);
+		list = nodeServiceImp.queryNodeListByParentId(nodeEntity);
+		return list;
+	}
+	
+}

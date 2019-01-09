@@ -1,0 +1,102 @@
+/**
+	accodion大模块图标
+**/  
+.img_01 {
+    background-image:url(../icons/fam/computer.png);
+}
+.img_02 {
+    background-image:url(../icons/fam/coins.png);
+}
+.img_03 {
+    background-image:url(../icons/fam/chart_pie.png);
+}
+.img_04 {
+    background-image:url(../icons/fam/chart_bar.png);
+}
+/**
+	grid工具栏操作图标
+**/
+
+.a_refresh {
+    background-image:url(../icons/fam/table_refresh.png);
+}
+.a_add {
+    background-image:url(../icons/fam/add.png);
+}
+.a_cross {
+    background-image:url(../icons/fam/cross.gif);
+}
+.a_del {
+    background-image:url(../icons/fam/delete.gif);
+}
+.pencil_del {
+    background-image:url(../icons/fam/pencil_delete.png);
+}
+.a_edit {
+    background-image:url(../icons/fam/cog_edit.png);
+}
+.a_save {
+    background-image:url(../icons/fam/disk.png);
+}
+.a_search {
+    background-image:url(../icons/fam/find.png);
+}
+.a_grid {
+    background-image:url(../icons/fam/grid.png);
+}
+.a_role {
+    background-image:url(../icons/fam/user_add.png);
+}
+.application_edit {
+    background-image:url(../icons/fam/application_edit.png);
+}
+.page_excel {
+    background-image:url(../icons/fam/page_excel.png);
+}
+
+
+
+/**
+	登录页背景色渐变
+**/   
+.LoginBody{   
+    FILTER: progid:DXImageTransform.Microsoft.Gradient(gradientType=0,startColorStr=#71B9E3,endColorStr=#fafafa); /*IE*/   
+    background:-moz-linear-gradient(top,#71B9E3,#fafafa);/*火狐*/   
+    background:-webkit-gradient(linear, 0% 0%, 0% 100%,from(#71B9E3), to(#fafafa));/*谷歌*/   
+  
+    background-image: -webkit-gradient(linear,left bottom,left top,color-start(0, #71B9E3),color-stop(1, #fafafa));/* Safari & Chrome*/  
+    filter:  progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr='#71B9E3', endColorstr='#fafafa'); /*IE6 & IE7*/  
+    -ms-filter: "progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr='#71B9E3', endColorstr='#fafafa')"; /* IE8 */  
+}
+/**
+   North页背景色渐变
+**/   
+.NorthBody{   
+FILTER: progid:DXImageTransform.Microsoft.Gradient(gradientType=0,startColorStr=#BED3F0,endColorStr=#fafafa); /*IE*/   
+background:-moz-linear-gradient(top,#BED3F0,#fafafa);/*火狐*/   
+background:-webkit-gradient(linear, 0% 0%, 0% 160%,from(#BED3F0), to(#fafafa));/*谷歌*/   
+
+background-image: -webkit-gradient(linear,left bottom,left top,color-start(0, #BED3F0),color-stop(1, #fafafa));/* Safari & Chrome*/  
+filter:  progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr='#BED3F0', endColorstr='#fafafa'); /*IE6 & IE7*/  
+-ms-filter: "progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr='#BED3F0', endColorstr='#fafafa')"; /* IE8 */  
+
+font-family:微软雅黑,宋体;
+font-size: 16px;
+color:#04408C;
+font-weight: bold;
+word-spacing:8px;
+letter-spacing: 1px;
+}  
+.tableTrMain{
+font-family:微软雅黑,宋体;
+color:#04408C;
+font-weight: bold;
+}
+
+.tableTr{
+font-family:微软雅黑,宋体;
+font-size: 14px;
+font-weight: bold;
+text-align: center;
+color:#04408C;
+}

@@ -1,0 +1,60 @@
+package com.palline.table.dao.imp;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
+
+import com.palline.common.base.CommonBaseDao;
+import com.palline.common.plugin.ConverRowMapper;
+import com.palline.common.plugin.CurrentPage;
+import com.palline.common.plugin.PaginationHelper;
+import com.palline.table.dao.TableDisplayDao;
+import com.palline.table.entity.TableManager;
+
+
+@Repository
+public class TableDisplayDaoImp extends CommonBaseDao<Map<String ,Object>, Integer> implements TableDisplayDao{
+	private static final String nameSpace = "com.palline.table.entity.TableManager.";
+
+	@Resource
+	private JdbcTemplate jdbcTemplate;
+	
+
+	@SuppressWarnings("unchecked")
+	public List<Map<String,Object>> queryReportDisplayListPage(Map<String ,Object> map,String sql,int pageIndex,int pageSize){
+		PaginationHelper<Map<String,Object>> ph = new PaginationHelper<Map<String,Object>>();
+		List<Map<String,Object>> c=new ArrayList<Map<String,Object>>();
+		  try {
+		         CurrentPage<Map<String,Object>> p=ph.fetchPage(
+		                 jdbcTemplate,  
+		                 " select count(0)  from pl_reward_rule ",
+		                 " select *  from pl_reward_rule ",
+		                 new Object[]{},                
+		                 pageIndex,
+		                 pageSize,
+		                 new ConverRowMapper()
+		         );  
+		         c=p.getPageItems();
+		  } catch (Exception e) {
+		   e.printStackTrace();
+		  }
+		  return c;
+	}
+
+	public List<Map<String,Object>> findReportDisplayList(Map<String ,Object> map,String sql){
+		List<Map<String,Object>> list = jdbcTemplate.queryForList(sql);
+		return list;
+	}
+	
+	public TableManager findReportDisplayOne(Map<String ,Object> map){
+		TableManager reportManager = (TableManager) super.getSqlSession().selectOne(nameSpace+"findReportDisplayOne",map);
+		return reportManager;
+	}
+	
+
+}

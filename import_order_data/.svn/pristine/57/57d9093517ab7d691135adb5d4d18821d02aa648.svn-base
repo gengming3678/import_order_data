@@ -1,0 +1,106 @@
+package com.palline.rewardrule.controller;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.palline.common.util.Constant;
+import com.palline.common.util.StringUtil;
+import com.palline.common.util.TipInfo;
+import com.palline.rewardrule.entity.Holiday;
+import com.palline.rewardrule.service.imp.HolidayServiceImp;
+
+/**
+ * Copyright (C), 2015-8-10, 上海蓬海涞讯数据技术有限公司
+ * @author gmm
+ * @version 1.0
+ * @date 2015-8-10
+ */
+@Controller
+@RequestMapping("/holiday")
+public class HolidayController {	
+	@Resource
+	private HolidayServiceImp holidayServiceImp;
+	
+	/**
+	 * 导航
+	 **/
+
+	@RequestMapping(value = "/list.do")
+	public String list(Model model) {
+		String curYear = StringUtil.getCurYear();
+		//查询日历,比对数据库选中以保存的日期
+		List<Holiday> holidayList = holidayServiceImp.findHolidayListByYear(curYear);
+		String[] year20s = StringUtil.get20Years();
+		model.addAttribute("holidayList", holidayList);
+		model.addAttribute("year20s", year20s);
+		model.addAttribute("curYear", curYear);
+		return "holiday/holidayList";
+	}
+	
+	
+	@RequestMapping(value = "/queryList.do")
+	public String queryList(Model model,@RequestParam("curYear") String curYear) {
+		//查询日历,比对数据库选中以保存的日期
+		List<Holiday> holidayList = holidayServiceImp.findHolidayListByYear(curYear);
+		String[] year20s = StringUtil.get20Years();
+		model.addAttribute("holidayList", holidayList);
+		model.addAttribute("year20s", year20s);
+		model.addAttribute("curYear", curYear);
+		return "holiday/holidayList";
+	}
+	
+	/**
+	 * 新增数据
+	 **/
+	@ResponseBody
+	@RequestMapping(value = "/add.do",method=RequestMethod.POST)
+	public Object add(@RequestParam("selectDates[]") List<String> selectDates,
+			@RequestParam("curYear") String curYear) {
+		//清楚之前选择的当年数据
+		Map<String,Object> map=new HashMap<String,Object>();
+		map.put("year", curYear);
+		List<Holiday> holidayList = holidayServiceImp.findAllHolidayList(map);
+		Holiday holidayLike=new Holiday();
+		holidayLike.setYear(curYear);
+		for (Holiday holiday:holidayList) {
+			holidayServiceImp.deleteHolidayById(holiday.getId());
+		}
+		//重新插入进去
+		for (int i = 0; i < selectDates.size(); i++) {
+			Holiday holiday=new Holiday();
+			holiday.setHolidayDate(selectDates.get(i));
+			holidayServiceImp.insertHoliday(holiday);
+		}
+		return new TipInfo(Constant.SUCCESS,"操作成功!");
+	}
+	
+	/**
+	 * 删除数据
+	 **/
+	@ResponseBody
+	@RequestMapping(value = "/delete.do",method=RequestMethod.POST)
+	public Object delete(@RequestParam("curYear") String curYear) {
+		//清楚之前选择的当年数据
+		Map<String,Object> map=new HashMap<String,Object>();
+		map.put("year", curYear);
+		List<Holiday> holidayList = holidayServiceImp.findAllHolidayList(map);
+		Holiday holidayLike=new Holiday();
+		holidayLike.setYear(curYear);
+		for (Holiday holiday:holidayList) {
+			holidayServiceImp.deleteHolidayById(holiday.getId());
+		}
+		return new TipInfo(Constant.SUCCESS,"操作成功!");
+	}
+
+
+}

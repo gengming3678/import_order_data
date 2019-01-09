@@ -1,0 +1,43 @@
+package com.palline.chart.service;
+
+import java.util.List;
+import java.util.Map;
+
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+
+import com.palline.chart.entity.ChartManager;
+import com.palline.system.entity.User;
+import com.palline.table.entity.QueryCondition;
+
+/**
+ * Copyright (C), 2015-8-10, 上海蓬海涞讯数据技术有限公司
+ * @author gmm
+ * @version 1.0
+ * @date 2015-8-10
+ */
+public interface ChartDisplayService {
+	
+	public List<Map<String,Object>> findChartDisplayList(Map<String,Object> map,String sql);
+	
+	public ChartManager findChartManagerOne(Map<String ,Object> map);
+	
+	public Map<String,Object> findQueryCondition(QueryCondition queryCondition,User user,Integer nodeId);
+	
+	public String findChartGridDisplayListPage(List<Map<String ,Object>> list,int pageIndex,int pageSize);
+	
+	public Map<String,Object> findDisplayFieldNames(Map<String,Object> map);
+	
+	public int exportExcelHeaders(HSSFSheet sheet,HSSFRow row1,	HSSFCellStyle style,Object[] coloumnNames);
+	
+	public void exportExcelDatas(HSSFSheet sheet,List<Map<String,Object>> list,String[] coloumnFields,Integer crossLineNum);
+	
+	public String parseBarJsonByList(List<Map<String,Object>> list,ChartManager chartManager);
+	
+	public String parseLineJsonByList(List<Map<String,Object>> list,ChartManager chartManager);
+	
+	public String parsePieJsonByList(List<Map<String,Object>> list);
+	
+	
+}

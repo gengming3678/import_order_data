@@ -1,0 +1,26 @@
+package com.palline.table.dao;
+
+import java.util.List;
+
+import com.palline.table.entity.TableManager;
+
+/**
+ * Copyright (C), 2015-8-10, 上海蓬海涞讯数据技术有限公司
+ * @author gmm
+ * @version 1.0
+ * @date 2015-8-10
+ */
+public interface TableManagerDao {
+
+	public List<TableManager> findReportList(TableManager report);
+	
+	public Long getReportPageTotal(TableManager report);
+	
+	public int updateReport(TableManager report);
+	
+	public int deleteReportById(Integer id);
+	
+	public int insertReport(TableManager report);
+	
+	
+}

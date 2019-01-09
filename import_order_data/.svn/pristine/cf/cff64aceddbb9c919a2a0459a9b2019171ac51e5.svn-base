@@ -1,0 +1,224 @@
+package com.palline.chart.controller;
+
+import java.awt.Font;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.hssf.usermodel.HSSFFont;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.hssf.util.HSSFColor;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.palline.chart.entity.ChartManager;
+import com.palline.chart.service.imp.ChartDisplayServiceImp;
+import com.palline.common.util.Constant;
+import com.palline.system.entity.IdNameEntity;
+import com.palline.system.entity.User;
+import com.palline.table.entity.QueryCondition;
+
+/**
+ * Copyright (C), 2015-8-10, 上海蓬海涞讯数据技术有限公司
+ * @author gmm
+ * @version 1.0
+ * @date 2015-8-10
+ */
+@Controller
+@RequestMapping("/chartDisplay")
+public class ChartDisplayController {	
+	
+	
+	@Resource
+	private ChartDisplayServiceImp chartDisplayServiceImp;
+	
+	
+	/**
+	 * 导航
+	 **/
+
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/list.do")
+	public String list(Model model,@RequestParam("nodeId")Integer nodeId,@ModelAttribute QueryCondition queryCondition,
+			HttpServletRequest request) {
+		User user = (User) request.getSession().getAttribute(Constant.CUR_USER_SESSION);
+		try {
+		Map<String,Object> map=chartDisplayServiceImp.findQueryCondition(queryCondition, user, nodeId);
+		//1根据节点查询对应的sql，和表头字段
+		Map<String,Object> fieldsMaps = chartDisplayServiceImp.findDisplayFieldNames(map);
+		List<IdNameEntity> listIdNames = (List<IdNameEntity>) fieldsMaps.get("listIdNames");
+		String[] coloumnFields = (String[]) fieldsMaps.get("coloumnFields");
+		String condition = (String) fieldsMaps.get("queryCondition");
+		model.addAttribute("listColoumnFields", listIdNames);
+		model.addAttribute("coloumnFields", coloumnFields);
+		model.addAttribute("nodeId", nodeId);
+		model.addAttribute("queryCondition", condition);
+		model.addAttribute("startDate", map.get("startDate"));
+		model.addAttribute("endDate", map.get("endDate"));
+		model.addAttribute("startYm", map.get("startYm"));
+		model.addAttribute("endYm", map.get("endYm"));
+		model.addAttribute("statYm", map.get("statYm"));
+		model.addAttribute("statYmd", map.get("statYmd"));
+		} catch (Exception e) {
+			e.printStackTrace();
+			if(user==null){
+				return "login/login";
+			}
+			return "error/errorList";
+		}
+		model.addAttribute(Constant.PAGE_SIZE_STR, Constant.PAGE_SIZE);
+		return "chartDisplay/chartDisplayList";
+	}
+	
+	
+	
+	
+	/**
+	 * 返回  line bar pie line/bar chart 数据
+	 **/
+	@ResponseBody
+	@RequestMapping(value = "/getChartOptions.do",method=RequestMethod.POST,produces = "text/html;charset=UTF-8")
+	public Object getChartOptions(@RequestParam("nodeId")Integer nodeId,
+			@ModelAttribute QueryCondition queryCondition,HttpServletRequest request) {
+		User user = (User) request.getSession().getAttribute(Constant.CUR_USER_SESSION);
+		Map<String,Object> map=chartDisplayServiceImp.findQueryCondition(queryCondition, user, nodeId);
+		ChartManager reportManager = chartDisplayServiceImp.findChartManagerOne(map);
+		boolean ifProcedure = reportManager.isIfProcedure();
+		String sql = reportManager.getSqlContent();
+		if(ifProcedure){//存储where条件
+			sql = chartDisplayServiceImp.parseProcedureWhereCondition(map,sql);
+		}else{////sql where条件
+			sql = chartDisplayServiceImp.parseSqlWhereCondition(map,sql);
+		}
+		List<Map<String,Object>> list = chartDisplayServiceImp.findChartDisplayList(map,sql);
+		Integer type = reportManager.getType();
+		String chartJson = null;
+		if(type==1){
+			chartJson = chartDisplayServiceImp.parseLineJsonByList(list,reportManager);
+		}else if(type==2){
+			chartJson = chartDisplayServiceImp.parseBarJsonByList(list,reportManager);
+		}else if(type==3){
+			chartJson = chartDisplayServiceImp.parsePieJsonByList(list);
+		}
+		return chartJson;
+	}
+	
+	/**
+	 * 返回chart切换的表格数据
+	 * @param pageIndex
+	 * @param nodeId
+	 * @param queryCondition
+	 * @param request
+	 * @return
+	 */
+	@ResponseBody
+	@RequestMapping(value = "/findChartGridDisplayList.do",produces = "application/json; charset=utf-8")
+	public Object findChartGridDisplayList(@RequestParam("page") Integer pageIndex,
+			@RequestParam("nodeId")Integer nodeId,
+			@ModelAttribute QueryCondition queryCondition,HttpServletRequest request) {
+		User user = (User) request.getSession().getAttribute(Constant.CUR_USER_SESSION);
+		Map<String,Object> map=chartDisplayServiceImp.findQueryCondition(queryCondition, user, nodeId);
+		ChartManager reportManager = chartDisplayServiceImp.findChartManagerOne(map);
+		boolean ifProcedure = reportManager.isIfProcedure();
+		String sql = reportManager.getSqlContent();
+		if(ifProcedure){//存储where条件
+			sql = chartDisplayServiceImp.parseProcedureWhereCondition(map,sql);
+		}else{////sql where条件
+			sql = chartDisplayServiceImp.parseSqlWhereCondition(map,sql);
+		}
+		List<Map<String,Object>> list = chartDisplayServiceImp.findChartDisplayList(map,sql);
+		String curPageListJson = chartDisplayServiceImp.findChartGridDisplayListPage(list, pageIndex, Constant.PAGE_SIZE);
+		return curPageListJson;
+	}
+	
+	
+	
+	/**
+	 * 导出excel方法
+	 * @param request
+	 * @param response
+	 */
+    @RequestMapping("exportExcel")
+    public void exportExcel(HttpServletRequest request, HttpServletResponse response,
+    		@ModelAttribute QueryCondition queryCondition,@RequestParam("nodeId")Integer nodeId){
+    	// 生成提示信息，
+        response.setContentType("application/vnd.ms-excel");
+        String codedFileName = null;
+        OutputStream fOut = null;
+        try
+        {
+        	String sql = "";
+        	Object[] coloumnNames=new Object[]{};
+        	String[] coloumnFields=new String[]{};
+        	Map<String,Object> map=new HashMap<String, Object>();
+        	if(nodeId!=null){
+	    		 //1查询出节点对应的报表sql语句
+        		User user = (User) request.getSession().getAttribute(Constant.CUR_USER_SESSION);
+        		map=chartDisplayServiceImp.findQueryCondition(queryCondition, user, nodeId);
+	    		Map<String,Object> fieldsMaps = chartDisplayServiceImp.findDisplayFieldNames(map);
+	    		coloumnNames = (Object[]) fieldsMaps.get("coloumnNames");
+	    		coloumnFields = (String[]) fieldsMaps.get("coloumnFields");
+	    		sql = (String)fieldsMaps.get("sqlContent");
+	    		String nodeName = (String) fieldsMaps.get("nodeName");
+	            // 进行转码，使其支持中文文件名
+	            codedFileName = java.net.URLEncoder.encode(nodeName, "UTF-8");
+        	}
+            response.setHeader("content-disposition", "attachment;filename=" + codedFileName + ".xls");
+            // 产生工作簿对象
+            HSSFWorkbook workbook = new HSSFWorkbook();
+            HSSFCellStyle  style = workbook.createCellStyle();
+            HSSFFont font = workbook.createFont();
+            font.setFontName("宋体");
+            font.setBoldweight((short) Font.BOLD); //粗体
+            font.setColor(HSSFColor.BLUE.index);    //绿字
+            style.setFont(font);
+            //产生工作表对象
+            HSSFSheet sheet = workbook.createSheet();
+            //表头
+            HSSFRow row1 = sheet.createRow(0);
+            int crossLineNum = chartDisplayServiceImp.exportExcelHeaders(sheet,row1,style,coloumnNames);
+            //数据部分
+    		List<Map<String,Object>> list = chartDisplayServiceImp.findChartDisplayList(map,sql);
+    		chartDisplayServiceImp.exportExcelDatas(sheet,list,coloumnFields,crossLineNum);
+            fOut = response.getOutputStream();
+            workbook.write(fOut);
+        }
+        catch (UnsupportedEncodingException e1)
+        {
+        	e1.printStackTrace();
+        }
+        catch (Exception e)
+        {
+        	e.printStackTrace();
+        }
+        finally
+        {
+            try
+            {
+                fOut.flush();
+                fOut.close();
+            }
+            catch (IOException e) {
+            	e.printStackTrace();
+            }
+        }
+    }
+
+	
+    
+}

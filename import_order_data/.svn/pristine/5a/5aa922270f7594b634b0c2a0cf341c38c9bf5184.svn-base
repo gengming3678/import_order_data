@@ -1,0 +1,74 @@
+package com.palline.chart.entity;
+
+public class ChartManager {
+	
+	private Integer id;
+	private String specialLine;
+	private String sqlContent;
+	private Integer type;
+	private Integer nodeId;
+	private Integer[] nodeIds;
+	private String nodeName;
+	private boolean ifProcedure;
+	private String queryCondition;
+	
+	public Integer getId() {
+		return id;
+	}
+	public void setId(Integer id) {
+		this.id = id;
+	}
+	
+	public String getSpecialLine() {
+		return specialLine;
+	}
+	public void setSpecialLine(String specialLine) {
+		this.specialLine = specialLine;
+	}
+	public String getSqlContent() {
+		return sqlContent;
+	}
+	public void setSqlContent(String sqlContent) {
+		this.sqlContent = sqlContent;
+	}
+	public Integer getType() {
+		return type;
+	}
+	public void setType(Integer type) {
+		this.type = type;
+	}
+	
+	public String getNodeName() {
+		return nodeName;
+	}
+	public void setNodeName(String nodeName) {
+		this.nodeName = nodeName;
+	}
+	public boolean isIfProcedure() {
+		return ifProcedure;
+	}
+	public void setIfProcedure(boolean ifProcedure) {
+		this.ifProcedure = ifProcedure;
+	}
+	public String getQueryCondition() {
+		return queryCondition;
+	}
+	public void setQueryCondition(String queryCondition) {
+		this.queryCondition = queryCondition;
+	}
+	public Integer[] getNodeIds() {
+		return nodeIds;
+	}
+	public void setNodeIds(Integer[] nodeIds) {
+		this.nodeIds = nodeIds;
+	}
+	public Integer getNodeId() {
+		return nodeId;
+	}
+	public void setNodeId(Integer nodeId) {
+		this.nodeId = nodeId;
+	}
+	
+	
+
+}

@@ -1,0 +1,69 @@
+package com.palline.rewardrule.service.imp;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.palline.rewardrule.dao.imp.DeptDaoImp;
+import com.palline.rewardrule.entity.Dept;
+import com.palline.rewardrule.service.DeptService;
+import com.palline.system.entity.IdNameEntity;
+
+@Service
+public class DeptServiceImp implements DeptService{
+
+	@Autowired
+	private DeptDaoImp deptDaoImp;
+
+	@Override
+	public List<Dept> queryDeptListPage(Dept Dept, int pageIndex, int pageSize) {
+		// TODO Auto-generated method stub
+		return deptDaoImp.queryDeptListPage(Dept,pageIndex,pageSize);
+	}
+	
+	public List<IdNameEntity> findAllDeptList(Dept dept){
+		return deptDaoImp.findAllDeptList(dept);
+	}
+
+	public List<Integer> getSelectParamsByDeptId(Dept dept){
+		return deptDaoImp.getSelectParamsByDeptId(dept);
+	}
+	@Override
+	public Long getDeptPageTotal(Dept Dept) {
+		// TODO Auto-generated method stub
+		return deptDaoImp.getDeptPageTotal(Dept);
+	}
+
+
+
+	@Override
+	public int updateDept(Dept Dept) {
+		// TODO Auto-generated method stub
+		return deptDaoImp.updateDept(Dept);
+	}
+
+	@Override
+	public int deleteDeptById(Integer id) {
+		// TODO Auto-generated method stub
+		return deptDaoImp.deleteDeptById(id);
+	}
+
+	public int deleteDeptParamByDeptId(Integer id){
+		return deptDaoImp.deleteDeptParamByDeptId(id);
+	}
+	@Override
+	public int insertDept(Dept Dept) {
+		// TODO Auto-generated method stub
+		return deptDaoImp.insertDept(Dept);
+	}
+
+	public int saveDeptParam(Dept dept){
+		return deptDaoImp.saveDeptParam(dept);
+	}
+	
+	public int findDeptParamValue(Integer id){
+		return deptDaoImp.findDeptParamValue(id);
+	}
+	
+}

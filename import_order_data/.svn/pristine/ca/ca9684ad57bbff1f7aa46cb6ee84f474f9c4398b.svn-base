@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.palline.table.entity.TableManager">
+
+	<resultMap type="tableManagerEntity" id="tableManagerMap">
+		<id column="id" property="id" />
+		<result column="sqlContent" property="sqlContent" />
+		<result column="colName" property="colName" />
+		<result column="nodeName" property="nodeName" />
+		<result column="nodeId" property="nodeId" />
+		<result column="text" property="text" />
+		<result column="ifProcedure" property="ifProcedure" />
+		<result column="queryCondition" property="queryCondition" />
+	</resultMap>
+
+	<sql id="getReportWhere">
+		<where>
+			
+		    <if test="nodeName!=null  and nodeName!='' ">
+			 	and n.text like '%'+#{nodeName}+'%' 
+			</if>  
+			
+		</where>
+	</sql>
+	
+	<select id="getReportTotal" resultType="Long" parameterType="tableManagerEntity">
+		select count(0) from  pl_table_manager r LEFT JOIN pl_node n  on r.id=n.reportId
+		<include refid="getReportWhere"/> 
+	</select>
+	
+	<select id="getReportList" resultMap="tableManagerMap" parameterType="tableManagerEntity">
+		select r.id id,r.colName colName,r.sqlContent sqlContent,r.ifProcedure,r.queryCondition,
+		n.text nodeName,n.text text ,n.id nodeId
+		from pl_table_manager r LEFT JOIN pl_node n  on r.id=n.reportId
+		<include refid="getReportWhere"/> 
+		 order by id
+	</select>
+	
+	
+	<select id="findReportDisplayOne" resultMap="tableManagerMap" parameterType="map" >
+		select r.id,r.colName,r.sqlContent,n.id nodeId,n.text nodeName ,r.ifProcedure,r.queryCondition 
+		from pl_table_manager r ,pl_node n 
+		where n.reportId=r.id and n.id=#{nodeId}
+	</select>
+	
+	<insert id="saveReport" parameterType="tableManagerEntity"  useGeneratedKeys="true" keyProperty="id">
+	 	insert into pl_table_manager (colName, sqlContent,ifProcedure,queryCondition) 
+	 	VALUES (#{colName},#{sqlContent},#{ifProcedure},#{queryCondition})
+	</insert>
+	
+	<update id="updateReport" parameterType="tableManagerEntity">
+	   update pl_table_manager set 
+	   colName=#{colName} ,sqlContent=#{sqlContent},
+	   queryCondition=#{queryCondition},ifProcedure = #{ifProcedure}
+	    where id=#{id}
+	</update>
+	
+	<delete id="delReport" parameterType="Integer">
+		delete from pl_table_manager where id=#{id}
+	</delete>
+	
+
+</mapper> 

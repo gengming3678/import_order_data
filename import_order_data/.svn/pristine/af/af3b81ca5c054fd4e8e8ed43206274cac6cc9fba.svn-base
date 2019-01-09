@@ -1,0 +1,204 @@
+package com.palline.system.controller;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.alibaba.fastjson.JSON;
+import com.palline.common.util.Constant;
+import com.palline.common.util.JsonUtil;
+import com.palline.common.util.PageData;
+import com.palline.common.util.StringUtil;
+import com.palline.common.util.TipInfo;
+import com.palline.rewardrule.service.imp.DeptServiceImp;
+import com.palline.system.entity.IdNameEntity;
+import com.palline.system.entity.KeyValueCheck;
+import com.palline.system.entity.Role;
+import com.palline.system.service.imp.NodeServiceImp;
+import com.palline.system.service.imp.RoleServiceImp;
+
+/**
+ * Copyright (C), 2015-8-10, 上海蓬海涞讯数据技术有限公司
+ * @author gmm
+ * @version 1.0
+ * @date 2015-8-10
+ */
+@Controller
+@RequestMapping("/role")
+public class RoleController {	
+	@Resource
+	private RoleServiceImp roleServiceImp;
+	
+	@Resource
+	private NodeServiceImp nodeServiceImp;
+	
+	@Resource
+	private DeptServiceImp deptServiceImp;
+	
+	/**
+	 * 角色导航
+	 **/
+
+	@RequestMapping(value = "/list.do")
+	public String list(Model model) {
+		model.addAttribute(Constant.PAGE_SIZE_STR, Constant.PAGE_SIZE);
+		return "role/roleList";
+	}
+	
+	/**
+	 * 角色维护拉取数据
+	 **/
+	@ResponseBody
+	@RequestMapping(value = "/getJsonRoles.do")
+	public PageData<Role> getJsonRoles(@RequestParam("page") Integer pageIndex,@RequestParam("findName") String findName,HttpServletResponse response, HttpServletRequest request) {
+		Role role = new Role();
+		role.setRoleCode(StringUtil.strToUtf8(findName));
+		role.setRoleName(StringUtil.strToUtf8(findName));
+		Long total = roleServiceImp.getRolePageTotal(role);
+		List<Role> list = roleServiceImp.queryRoleListPage(role, pageIndex, Constant.PAGE_SIZE);
+		return new PageData<Role>(total,list);
+	}
+	
+	/**
+	 * 角色新增数据
+	 **/
+	@ResponseBody
+	@RequestMapping(value = "/add.do",method=RequestMethod.POST)
+	public Object add(@RequestParam("json") String json) {
+		String jsonNew = JsonUtil.replaceAllOnOff(json);
+		Role role=JSON.parseObject(jsonNew,Role.class);
+		int result = roleServiceImp.insertRole(role);
+		if(result>0){
+			return new TipInfo(Constant.SUCCESS,"操作成功!");
+		}else{
+			return new TipInfo(Constant.FAILTURE,"操作失败!");
+		}
+	}
+	
+	/**
+	 * 角色修改数据
+	 **/
+	@ResponseBody
+	@RequestMapping(value = "/edit.do",method=RequestMethod.POST)
+	public Object edit(@RequestParam("json") String json) {
+		String jsonNew = JsonUtil.replaceAllOnOff(json);
+		Role role=JSON.parseObject(jsonNew,Role.class);
+		int result = roleServiceImp.updateRole(role);
+		if(result>0){
+			return new TipInfo(Constant.SUCCESS,"操作成功!");
+		}else{
+			return new TipInfo(Constant.FAILTURE,"操作失败!");
+		}
+	}
+	
+	
+	/**
+	 * 角色菜单数据保存
+	 **/
+	@ResponseBody
+	@RequestMapping(value = "/saveRoleNode.do",method=RequestMethod.POST)
+	public Object saveRoleNode(@RequestParam("json") String json,@RequestParam("roleId") Integer roleId) {
+		 String[] nodeIds = json.split(",");
+		 roleServiceImp.deleteRoleNodeByRoleId(roleId);
+		 List<Map<String,Integer>> list=new ArrayList<Map<String,Integer>>();
+		 for (String nodeId:nodeIds) {
+			 if(!StringUtil.isBlank(nodeId)){
+				 Map<String,Integer> map=new HashMap<String, Integer>();
+				 map.put("nodeId", Integer.valueOf(nodeId));
+				 map.put("roleId", roleId);
+				 list.add(map);
+			 }
+		}
+		 if(list.size()>0){
+			 nodeServiceImp.insertRoleNode(list);
+		 }
+		return new TipInfo(Constant.FAILTURE,"操作成功!");
+	}
+	
+	/**
+	 * 角色删除数据
+	 **/
+	@ResponseBody
+	@RequestMapping(value = "/delete.do",method=RequestMethod.POST)
+	public Object delete(@RequestParam("id") Integer id) {
+		int result = roleServiceImp.deleteRoleById(id);
+		if(result>0){
+			return new TipInfo(Constant.SUCCESS,"操作成功!");
+		}else{
+			return new TipInfo(Constant.FAILTURE,"操作失败!");
+		}
+	}
+	
+	
+	/**
+	 * 角色拉取数据
+	 **/
+	@ResponseBody
+	@RequestMapping(value = "/getAllRoles.do")
+	public List<Role> getAllRoles() {
+		List<Role> list = roleServiceImp.queryRoleList(null);
+		return list;
+	}
+	
+	@ResponseBody
+	@RequestMapping(value = "/getCheckDeptsByRoleId.do")
+	public List<KeyValueCheck> getCheckDeptsByRoleId(@RequestParam("parentName") String parentName,
+			@RequestParam("roleId") Integer roleId){
+		List<KeyValueCheck> keyValueList=new ArrayList<KeyValueCheck>();
+		Role role=new Role();
+		role.setRoleId(roleId);
+		List<Role> roleList = roleServiceImp.getSelectDeptListByRoleId(role);
+		List<Integer> ids=new ArrayList<Integer>();
+		for(Role role2:roleList){
+			ids.add(role2.getDeptId());
+		}
+		
+		List<IdNameEntity> deptList = deptServiceImp.findAllDeptList(null);
+		for (IdNameEntity idNameEntity:deptList) {
+			KeyValueCheck keyValueCheck=new KeyValueCheck();
+			keyValueCheck.setId(String.valueOf(idNameEntity.getId()));
+			keyValueCheck.setText(idNameEntity.getCode()+"---"+idNameEntity.getName());
+			keyValueCheck.setLeaf(true);
+			keyValueCheck.setExpanded(true);
+			keyValueCheck.setChecked(ids.contains(idNameEntity.getId()));
+			keyValueList.add(keyValueCheck);
+		}
+		return keyValueList;
+	}
+	
+	/**
+	 * 角色菜单数据保存
+	 **/
+	@ResponseBody
+	@RequestMapping(value = "/saveRoleDept.do",method=RequestMethod.POST)
+	public Object saveRoleDept(@RequestParam("json") String json,@RequestParam("roleId") Integer roleId) {
+		 String[] deptIds = json.split(",");
+		 roleServiceImp.deleteRoleDeptByRoleId(roleId);
+		 List<Map<String,Integer>> list=new ArrayList<Map<String,Integer>>();
+		 for (String deptId:deptIds) {
+			 if(!StringUtil.isBlank(deptId)){
+				 Map<String,Integer> map=new HashMap<String, Integer>();
+				 map.put("roleId", Integer.valueOf(roleId));
+				 map.put("deptId",Integer.valueOf(deptId));
+				 list.add(map);
+			 } 
+		}
+		 if(list.size()>0){
+			 roleServiceImp.insertRoleDept(list);
+		 }
+		return new TipInfo(Constant.FAILTURE,"操作成功!");
+	}
+
+}
