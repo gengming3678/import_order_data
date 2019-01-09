@@ -6,6 +6,6 @@
 <title>报表系统</title>
 </head>  
 <body >
-欢迎！
+欢迎！----------
 </body>
 </html>
